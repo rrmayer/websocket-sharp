@@ -34,16 +34,16 @@ using System.Timers;
 namespace WebSocketSharp.Server {
 
   /// <summary>
-  /// Manages the collection of <see cref="WebSocketService"/> objects.
+  /// Manages the collection of <see cref="WebSocketSession"/> objects.
   /// </summary>
-  public class WebSocketServiceManager {
+  public class WebSocketSessionManager {
 
     #region Fields
 
     private object                               _forSweep;
     private volatile bool                        _isStopped;
     private volatile bool                        _isSweeping;
-    private Dictionary<string, WebSocketService> _services;
+    private Dictionary<string, WebSocketSession> _services;
     private Timer                                _sweepTimer;
     private object                               _syncRoot;
 
@@ -51,12 +51,12 @@ namespace WebSocketSharp.Server {
 
     #region Constructor
 
-    internal WebSocketServiceManager()
+    internal WebSocketSessionManager()
     {
       _forSweep   = new object();
       _isStopped  = false;
       _isSweeping = false;
-      _services   = new Dictionary<string, WebSocketService>();
+      _services   = new Dictionary<string, WebSocketSession>();
       _syncRoot   = new object();
 
       setSweepTimer();
@@ -68,11 +68,11 @@ namespace WebSocketSharp.Server {
     #region Properties
 
     /// <summary>
-    /// Gets the collection of IDs of active <see cref="WebSocketService"/> objects
-    /// managed by the <see cref="WebSocketServiceManager"/>.
+    /// Gets the collection of IDs of active <see cref="WebSocketSession"/> objects
+    /// managed by the <see cref="WebSocketSessionManager"/>.
     /// </summary>
     /// <value>
-    /// An IEnumerable&lt;string&gt; that contains the collection of IDs of active <see cref="WebSocketService"/> objects.
+    /// An IEnumerable&lt;string&gt; that contains the collection of IDs of active <see cref="WebSocketSession"/> objects.
     /// </value>
     public IEnumerable<string> ActiveIDs {
       get {
@@ -83,12 +83,12 @@ namespace WebSocketSharp.Server {
     }
 
     /// <summary>
-    /// Gets the number of <see cref="WebSocketService"/> objects
-    /// managed by the <see cref="WebSocketServiceManager"/>.
+    /// Gets the number of <see cref="WebSocketSession"/> objects
+    /// managed by the <see cref="WebSocketSessionManager"/>.
     /// </summary>
     /// <value>
-    /// An <see cref="int"/> that contains the number of <see cref="WebSocketService"/> objects
-    /// managed by the <see cref="WebSocketServiceManager"/>.
+    /// An <see cref="int"/> that contains the number of <see cref="WebSocketSession"/> objects
+    /// managed by the <see cref="WebSocketSessionManager"/>.
     /// </value>
     public int Count {
       get {
@@ -100,11 +100,11 @@ namespace WebSocketSharp.Server {
     } 
 
     /// <summary>
-    /// Gets the collection of IDs of inactive <see cref="WebSocketService"/> objects
-    /// managed by the <see cref="WebSocketServiceManager"/>.
+    /// Gets the collection of IDs of inactive <see cref="WebSocketSession"/> objects
+    /// managed by the <see cref="WebSocketSessionManager"/>.
     /// </summary>
     /// <value>
-    /// An IEnumerable&lt;string&gt; that contains the collection of IDs of inactive <see cref="WebSocketService"/> objects.
+    /// An IEnumerable&lt;string&gt; that contains the collection of IDs of inactive <see cref="WebSocketSession"/> objects.
     /// </value>
     public IEnumerable<string> InactiveIDs {
       get {
@@ -115,11 +115,11 @@ namespace WebSocketSharp.Server {
     }
 
     /// <summary>
-    /// Gets the collection of IDs of <see cref="WebSocketService"/> objects
-    /// managed by the <see cref="WebSocketServiceManager"/>.
+    /// Gets the collection of IDs of <see cref="WebSocketSession"/> objects
+    /// managed by the <see cref="WebSocketSessionManager"/>.
     /// </summary>
     /// <value>
-    /// An IEnumerable&lt;string&gt; that contains the collection of IDs of <see cref="WebSocketService"/> objects.
+    /// An IEnumerable&lt;string&gt; that contains the collection of IDs of <see cref="WebSocketSession"/> objects.
     /// </value>
     public IEnumerable<string> IDs {
       get {
@@ -131,11 +131,11 @@ namespace WebSocketSharp.Server {
     }
 
     /// <summary>
-    /// Gets a value indicating whether the <see cref="WebSocketServiceManager"/> cleans up
-    /// the inactive <see cref="WebSocketService"/> objects periodically.
+    /// Gets a value indicating whether the <see cref="WebSocketSessionManager"/> cleans up
+    /// the inactive <see cref="WebSocketSession"/> objects periodically.
     /// </summary>
     /// <value>
-    /// <c>true</c> if the <see cref="WebSocketServiceManager"/> cleans up the inactive <see cref="WebSocketService"/> objects
+    /// <c>true</c> if the <see cref="WebSocketSessionManager"/> cleans up the inactive <see cref="WebSocketSession"/> objects
     /// every 60 seconds; otherwise, <c>false</c>.
     /// </value>
     public bool Sweeped {
@@ -206,11 +206,11 @@ namespace WebSocketSharp.Server {
         services.Current.SendAsync(data, completed);
     }
 
-    private Dictionary<string, WebSocketService> copy()
+    private Dictionary<string, WebSocketSession> copy()
     {
       lock (_syncRoot)
       {
-        return new Dictionary<string, WebSocketService>(_services);
+        return new Dictionary<string, WebSocketSession>(_services);
       }
     }
 
@@ -261,7 +261,7 @@ namespace WebSocketSharp.Server {
 
     #region Internal Methods
 
-    internal string Add(WebSocketService service)
+    internal string Add(WebSocketSession service)
     {
       lock (_syncRoot)
       {
@@ -303,8 +303,8 @@ namespace WebSocketSharp.Server {
     #region Public Methods
 
     /// <summary>
-    /// Broadcasts the specified array of <see cref="byte"/> to the clients of every <see cref="WebSocketService"/>
-    /// managed by the <see cref="WebSocketServiceManager"/>.
+    /// Broadcasts the specified array of <see cref="byte"/> to the clients of every <see cref="WebSocketSession"/>
+    /// managed by the <see cref="WebSocketSessionManager"/>.
     /// </summary>
     /// <param name="data">
     /// An array of <see cref="byte"/> to broadcast.
@@ -318,8 +318,8 @@ namespace WebSocketSharp.Server {
     }
 
     /// <summary>
-    /// Broadcasts the specified <see cref="string"/> to the clients of every <see cref="WebSocketService"/>
-    /// managed by the <see cref="WebSocketServiceManager"/>.
+    /// Broadcasts the specified <see cref="string"/> to the clients of every <see cref="WebSocketSession"/>
+    /// managed by the <see cref="WebSocketSessionManager"/>.
     /// </summary>
     /// <param name="data">
     /// A <see cref="string"/> to broadcast.
@@ -333,12 +333,12 @@ namespace WebSocketSharp.Server {
     }
 
     /// <summary>
-    /// Pings with the specified <see cref="string"/> to the clients of every <see cref="WebSocketService"/>
-    /// managed by the <see cref="WebSocketServiceManager"/>.
+    /// Pings with the specified <see cref="string"/> to the clients of every <see cref="WebSocketSession"/>
+    /// managed by the <see cref="WebSocketSessionManager"/>.
     /// </summary>
     /// <returns>
     /// A Dictionary&lt;string, bool&gt; that contains the collection of IDs and values
-    /// indicating whether each <see cref="WebSocketService"/> received a Pong in a time.
+    /// indicating whether each <see cref="WebSocketSession"/> received a Pong in a time.
     /// </returns>
     /// <param name="message">
     /// A <see cref="string"/> that contains a message.
@@ -353,7 +353,7 @@ namespace WebSocketSharp.Server {
     }
 
     /// <summary>
-    /// Cleans up the inactive <see cref="WebSocketService"/> objects.
+    /// Cleans up the inactive <see cref="WebSocketSession"/> objects.
     /// </summary>
     public void Sweep()
     {
@@ -373,7 +373,7 @@ namespace WebSocketSharp.Server {
               return;
             }
 
-            WebSocketService service;
+            WebSocketSession service;
             if (TryGetWebSocketService(id, out service))
               service.Stop(CloseStatusCode.ABNORMAL, String.Empty);
           }
@@ -384,18 +384,18 @@ namespace WebSocketSharp.Server {
     }
 
     /// <summary>
-    /// Tries to get the <see cref="WebSocketService"/> associated with the specified <paramref name="id"/>.
+    /// Tries to get the <see cref="WebSocketSession"/> associated with the specified <paramref name="id"/>.
     /// </summary>
     /// <returns>
-    /// <c>true</c> if the <see cref="WebSocketServiceManager"/> manages the <see cref="WebSocketService"/> with the specified <paramref name="id"/>; otherwise, <c>false</c>.
+    /// <c>true</c> if the <see cref="WebSocketSessionManager"/> manages the <see cref="WebSocketSession"/> with the specified <paramref name="id"/>; otherwise, <c>false</c>.
     /// </returns>
     /// <param name="id">
     /// A <see cref="string"/> that contains the ID to find.
     /// </param>
     /// <param name="service">
-    /// When this method returns, contains the <see cref="WebSocketService"/> with the specified <paramref name="id"/>, if the <paramref name="id"/> is found; otherwise, <see langword="null"/>.
+    /// When this method returns, contains the <see cref="WebSocketSession"/> with the specified <paramref name="id"/>, if the <paramref name="id"/> is found; otherwise, <see langword="null"/>.
     /// </param>
-    public bool TryGetWebSocketService(string id, out WebSocketService service)
+    public bool TryGetWebSocketService(string id, out WebSocketSession service)
     {
       lock (_syncRoot)
       {

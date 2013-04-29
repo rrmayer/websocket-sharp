@@ -32,7 +32,7 @@ using WebSocketSharp.Net.WebSockets;
 namespace WebSocketSharp.Server {
 
   /// <summary>
-  /// Exposes the methods and property for the host that provides a <see cref="WebSocketService"/>.
+  /// Exposes the methods and property for the host that provides a <see cref="WebSocketSession"/>.
   /// </summary>
   /// <remarks>
   /// </remarks>
@@ -47,7 +47,7 @@ namespace WebSocketSharp.Server {
     bool Sweeped { get; set; }
 
     /// <summary>
-    /// Binds the specified <see cref="WebSocketContext"/> to a <see cref="WebSocketService"/> instance.
+    /// Binds the specified <see cref="WebSocketContext"/> to a <see cref="WebSocketSession"/> instance.
     /// </summary>
     /// <param name="context">
     /// A <see cref="WebSocketContext"/> that contains the WebSocket connection request objects to bind.

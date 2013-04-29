@@ -232,10 +232,10 @@ namespace WebSocketSharp.Server
         /// A <see cref="string"/> that contains an absolute path associated with the WebSocket service.
         /// </param>
         /// <typeparam name="T">
-        /// The type of the WebSocket service. The T must inherit the <see cref="WebSocketService"/> class.
+        /// The type of the WebSocket service. The T must inherit the <see cref="WebSocketSession"/> class.
         /// </typeparam>
         public void AddWebSocketService<T>(string absPath)
-          where T : WebSocketService, new()
+          where T : WebSocketSession, new()
         {
             var svcHost = new WebSocketServiceHost<T>
                               {
@@ -253,7 +253,7 @@ namespace WebSocketSharp.Server
         /// A <see cref="string"/> that contains an absolute path associated with the WebSocket service.
         /// </param>
         /// <typeparam name="T">
-        /// The type of the WebSocket service. The T must inherit the <see cref="WebSocketService"/> class.
+        /// The type of the WebSocket service. The T must inherit the <see cref="WebSocketSession"/> class.
         /// </typeparam>
         public void AddWebSocketService(IServiceHost svcHost, string absPath)
         {

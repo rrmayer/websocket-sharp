@@ -42,15 +42,15 @@ namespace WebSocketSharp.Server {
   /// <remarks>
   /// The WebSocketServiceHost&lt;T&gt; class provides the single WebSocket service.
   /// </remarks>
-  /// <typeparam name="T">
-  /// The type of the WebSocket service that the server provides. The T must inherit the <see cref="WebSocketService"/> class.
+  /// <typeparam name="TSession">
+  /// The type of the WebSocket service that the server provides. The T must inherit the <see cref="WebSocketSession"/> class.
   /// </typeparam>
-  public class WebSocketServiceHost<T> : WebSocketServerBase, IServiceHost
-    where T : WebSocketService, new()
+  public class WebSocketServiceHost<TSession> : WebSocketServerBase, IServiceHost
+    where TSession : WebSocketSession, new()
   {
     #region Field
 
-    private WebSocketServiceManager _sessions;
+    private WebSocketSessionManager _sessions;
 
     #endregion
 
@@ -221,7 +221,7 @@ namespace WebSocketSharp.Server {
 
     private void init()
     {
-      _sessions = new WebSocketServiceManager();
+      _sessions = new WebSocketSessionManager();
     }
 
     #endregion
@@ -229,14 +229,14 @@ namespace WebSocketSharp.Server {
     #region Explicit Interface Implementation
 
     /// <summary>
-    /// Binds the specified <see cref="WebSocketContext"/> to a <see cref="WebSocketService"/> instance.
+    /// Binds the specified <see cref="WebSocketContext"/> to a <see cref="WebSocketSession"/> instance.
     /// </summary>
     /// <param name="context">
     /// A <see cref="WebSocketContext"/> that contains the WebSocket connection request objects to bind.
     /// </param>
     void IServiceHost.BindWebSocket(WebSocketContext context)
     {
-      T service = new T();
+      TSession service = new TSession();
       service.Bind(context, _sessions);
       service.Start();
     }
