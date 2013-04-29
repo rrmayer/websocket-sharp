@@ -13,6 +13,8 @@ namespace Example2 {
               ? String.Format("'{0}' returns to {1}", e.Data, QueryString["name"])
               : e.Data;
       Send(msg);
+
+        this.Ping()
     }
 
     protected override bool ProcessCookies(CookieCollection request, CookieCollection response)

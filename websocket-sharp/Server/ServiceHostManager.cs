@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace WebSocketSharp.Server {
 
@@ -35,7 +36,7 @@ namespace WebSocketSharp.Server {
   
     #region Fields
 
-    private Dictionary<string, IServiceHost> _svcHosts;
+    private readonly ConcurrentDictionary<string, IServiceHost> _svcHosts;
     private bool                             _sweeped;
 
     #endregion
@@ -44,7 +45,7 @@ namespace WebSocketSharp.Server {
 
     public ServiceHostManager()
     {
-      _svcHosts = new Dictionary<string, IServiceHost>();
+      _svcHosts = new ConcurrentDictionary<string, IServiceHost>();
       _sweeped  = true;
     }
 
@@ -91,7 +92,7 @@ namespace WebSocketSharp.Server {
 
     public void Add(string absPath, IServiceHost svcHost)
     {
-      _svcHosts.Add(absPath.UrlDecode(), svcHost);
+      _svcHosts.TryAdd(absPath.UrlDecode(), svcHost);
     }
 
     public void Broadcast(string data)
