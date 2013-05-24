@@ -26,50 +26,57 @@
  */
 #endregion
 
-using System;
+using System.Collections.Generic;
 using WebSocketSharp.Net.WebSockets;
 
-namespace WebSocketSharp.Server {
-
-  /// <summary>
-  /// Exposes the methods and property for the host that provides a <see cref="WebSocketService"/>.
-  /// </summary>
-  /// <remarks>
-  /// </remarks>
-  public interface IServiceHost {
+namespace WebSocketSharp.Server
+{
 
     /// <summary>
-    /// Gets or sets a value indicating whether the WebSocket service host cleans up the inactive service clients periodically.
+    /// Exposes the methods and property for the host that provides a <see cref="WebSocketService"/>.
     /// </summary>
-    /// <value>
-    /// <c>true</c> if the WebSocket service host cleans up the inactive service clients periodically; otherwise, <c>false</c>.
-    /// </value>
-    bool Sweeped { get; set; }
+    /// <remarks>
+    /// </remarks>
+    public interface IServiceHost
+    {
 
-    /// <summary>
-    /// Binds the specified <see cref="WebSocketContext"/> to a <see cref="WebSocketService"/> instance.
-    /// </summary>
-    /// <param name="context">
-    /// A <see cref="WebSocketContext"/> that contains the WebSocket connection request objects to bind.
-    /// </param>
-    void BindWebSocket(WebSocketContext context);
+        /// <summary>
+        /// Gets the Path of the WebSocket URL on which to bind this service.
+        /// </summary>
+        /// <value>
+        /// A <see cref="string"/> that contains a path.
+        /// </value>
+        string Path { get; }
 
-    /// <summary>
-    /// Broadcasts the specified <see cref="string"/> to all service clients.
-    /// </summary>
-    /// <param name="data">
-    /// A <see cref="string"/> to broadcast.
-    /// </param>
-    void Broadcast(string data);
+        /// <summary>
+        /// Gets or sets a value indicating whether the WebSocket service host cleans up the inactive service clients periodically.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if the WebSocket service host cleans up the inactive service clients periodically; otherwise, <c>false</c>.
+        /// </value>
+        bool AutoCleanExpiredSessions { get; set; }
 
-    /// <summary>
-    /// Starts the WebSocket service host.
-    /// </summary>
-    void Start();
+        /// <summary>
+        /// Broadcasts the specified <see cref="string"/> to all service clients.
+        /// </summary>
+        /// <param name="data">
+        /// A <see cref="string"/> to broadcast.
+        /// </param>
+        void Broadcast(string data);
 
-    /// <summary>
-    /// Stops the WebSocket service host.
-    /// </summary>
-    void Stop();
-  }
+        /// <summary>
+        /// Broadcasts the specified <see cref="string"/> to all service clients.
+        /// </summary>
+        /// <param name="data">
+        /// A <see cref="byte"/> to broadcast.
+        /// </param>
+        void Broadcast(byte[] data);
+
+        /// <summary>
+        /// Informs the service host that a new client has joined.
+        /// </summary>
+        void NewWebSocketClient(WebSocketContext context);
+
+        IEnumerable<WebSocketContext> CurrentSessions { get; }
+    }
 }

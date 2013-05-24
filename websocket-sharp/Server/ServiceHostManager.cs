@@ -26,94 +26,105 @@
  */
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace WebSocketSharp.Server {
+namespace WebSocketSharp.Server
+{
 
-  internal class ServiceHostManager {
-  
-    #region Fields
-
-    private readonly ConcurrentDictionary<string, IServiceHost> _svcHosts;
-    private bool                             _sweeped;
-
-    #endregion
-
-    #region Constructor
-
-    public ServiceHostManager()
+    internal class ServiceHostManager
     {
-      _svcHosts = new ConcurrentDictionary<string, IServiceHost>();
-      _sweeped  = true;
-    }
+        #region Fields
 
-    #endregion
+        private readonly ConcurrentDictionary<string, IServiceHost> _svcHosts;
+        private bool _autoCleanOldSessions;
 
-    #region Properties
+        #endregion
 
-    public int Count {
-      get {
-        return _svcHosts.Count;
-      }
-    } 
+        #region Constructor
 
-    public IEnumerable<string> Paths {
-      get {
-        return _svcHosts.Keys;
-      }
-    }
-
-    public IEnumerable<IServiceHost> ServiceHosts {
-      get {
-        return _svcHosts.Values;
-      }
-    }
-
-    public bool Sweeped {
-      get {
-        return _sweeped;
-      }
-
-      set {
-        if (_sweeped ^ value)
+        public ServiceHostManager()
         {
-          _sweeped = value;
-          foreach (var svcHost in _svcHosts.Values)
-            svcHost.Sweeped = value;
+            _svcHosts = new ConcurrentDictionary<string, IServiceHost>();
+            _autoCleanOldSessions = true;
         }
-      }
+
+        #endregion
+
+        #region Properties
+
+        public int Count
+        {
+            get
+            {
+                return _svcHosts.Count;
+            }
+        }
+
+        public IEnumerable<string> Paths
+        {
+            get
+            {
+                return _svcHosts.Keys;
+            }
+        }
+
+        public IEnumerable<IServiceHost> ServiceHosts
+        {
+            get
+            {
+                return _svcHosts.Values;
+            }
+        }
+
+        public bool AutoCleanOldSessions
+        {
+            get
+            {
+                return _autoCleanOldSessions;
+            }
+
+            set
+            {
+                if (_autoCleanOldSessions ^ value)
+                {
+                    _autoCleanOldSessions = value;
+                    foreach (var svcHost in _svcHosts.Values)
+                        svcHost.AutoCleanExpiredSessions = value;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        public void Add(string absPath, IServiceHost svcHost)
+        {
+            _svcHosts.TryAdd(absPath.UrlDecode(), svcHost);
+        }
+
+        public void Broadcast(string data)
+        {
+            foreach (var svcHost in _svcHosts.Values)
+                svcHost.Broadcast(data);
+        }
+
+        public bool TryGetServiceHost(string absPath, out IServiceHost svcHost)
+        {
+            return _svcHosts.TryGetValue(absPath, out svcHost);
+        }
+
+        public void CloseAllSessionsForServerShutdown()
+        {
+            var q = from o in ServiceHosts
+                    from s in o.CurrentSessions
+                    select s;
+            Parallel.ForEach(q, session => session.WebSocket.Close(CloseStatusCode.AWAY, "Server shutting down."));
+        }
+
+        #endregion
     }
-
-    #endregion
-
-    #region Public Methods
-
-    public void Add(string absPath, IServiceHost svcHost)
-    {
-      _svcHosts.TryAdd(absPath.UrlDecode(), svcHost);
-    }
-
-    public void Broadcast(string data)
-    {
-      foreach (var svcHost in _svcHosts.Values)
-        svcHost.Broadcast(data);
-    }
-
-    public void Stop()
-    {
-      foreach (var svcHost in _svcHosts.Values)
-        svcHost.Stop();
-
-      _svcHosts.Clear();
-    }
-
-    public bool TryGetServiceHost(string absPath, out IServiceHost svcHost)
-    {
-      return _svcHosts.TryGetValue(absPath, out svcHost);
-    }
-
-    #endregion
-  }
 }

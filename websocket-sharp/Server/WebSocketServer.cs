@@ -31,6 +31,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using WebSocketSharp.Net.WebSockets;
 using HttpStatusCode = WebSocketSharp.Net.HttpStatusCode;
 
@@ -42,7 +43,7 @@ namespace WebSocketSharp.Server
     /// <remarks>
     /// The WebSocketServer class provides the multi WebSocket service.
     /// </remarks>
-    public class WebSocketServer : WebSocketServerBase
+    public sealed class WebSocketServer : WebSocketServerBase
     {
         #region Field
 
@@ -87,7 +88,8 @@ namespace WebSocketSharp.Server
         public WebSocketServer(string url)
             : base(url)
         {
-            if (BaseUri.AbsolutePath != "/") {
+            if (BaseUri.AbsolutePath != "/")
+            {
                 var msg = "Must not contain the path component: " + url;
                 throw new ArgumentException(msg, "url");
             }
@@ -172,16 +174,16 @@ namespace WebSocketSharp.Server
         /// <c>true</c> if the server cleans up the inactive clients every 60 seconds; otherwise, <c>false</c>.
         /// The default value is <c>true</c>.
         /// </value>
-        public bool Sweeped
+        public bool AutoCleanOldSessions
         {
             get
             {
-                return _svcHosts.Sweeped;
+                return _svcHosts.AutoCleanOldSessions;
             }
 
             set
             {
-                _svcHosts.Sweeped = value;
+                _svcHosts.AutoCleanOldSessions = value;
             }
         }
 
@@ -210,7 +212,8 @@ namespace WebSocketSharp.Server
             var path = context.Path.UrlDecode();
 
             IServiceHost svcHost;
-            if (!_svcHosts.TryGetServiceHost(path, out svcHost)) {
+            if (!_svcHosts.TryGetServiceHost(path, out svcHost))
+            {
                 websocket.Close(HttpStatusCode.NotImplemented);
                 return;
             }
@@ -218,7 +221,7 @@ namespace WebSocketSharp.Server
             if (BaseUri.IsAbsoluteUri)
                 websocket.Url = new Uri(BaseUri, path);
 
-            svcHost.BindWebSocket(context);
+            svcHost.NewWebSocketClient(context);
         }
 
         #endregion
@@ -235,14 +238,9 @@ namespace WebSocketSharp.Server
         /// The type of the WebSocket service. The T must inherit the <see cref="WebSocketService"/> class.
         /// </typeparam>
         public void AddWebSocketService<T>(string absPath)
-          where T : WebSocketService, new()
+          where T : IWebSocketService, new()
         {
-            var svcHost = new WebSocketServiceHost<T>
-                              {
-                                  Uri = BaseUri.IsAbsoluteUri ?
-                                            new Uri(BaseUri, absPath) : absPath.ToUri()
-                              };
-
+            var svcHost = new WebSocketServiceHost<T>(absPath);
             AddWebSocketService(svcHost, absPath);
         }
 
@@ -258,18 +256,14 @@ namespace WebSocketSharp.Server
         public void AddWebSocketService(IServiceHost svcHost, string absPath)
         {
             string msg;
-            if (!absPath.IsValidAbsolutePath(out msg)) {
-                Error(msg);
-                return;
-            }
+            if (!absPath.IsValidAbsolutePath(out msg))
+                throw new ArgumentException(msg, "absPath");
 
-            if (svcHost == null) {
-                Error("svcHost cannot be null.");
-                return;
-            }
+            if (svcHost == null)
+                throw new ArgumentNullException("svcHost");
 
-            if (!Sweeped)
-                svcHost.Sweeped = Sweeped;
+            if (!AutoCleanOldSessions)
+                svcHost.AutoCleanExpiredSessions = AutoCleanOldSessions;
 
             _svcHosts.Add(absPath, svcHost);
         }
@@ -286,12 +280,13 @@ namespace WebSocketSharp.Server
         }
 
         /// <summary>
-        /// Stops receiving the WebSocket connection requests.
+        /// Stops receiving the WebSocket connection requests and terminates
+        /// all existing connections.
         /// </summary>
         public override void Stop()
         {
             base.Stop();
-            _svcHosts.Stop();
+            _svcHosts.CloseAllSessionsForServerShutdown();
         }
 
         #endregion

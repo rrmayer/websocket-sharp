@@ -85,6 +85,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Ext.cs" />
+    <Compile Include="Server\IWebSocketService.cs" />
     <Compile Include="WsState.cs" />
     <Compile Include="MessageEventArgs.cs" />
     <Compile Include="CloseEventArgs.cs" />
@@ -93,7 +94,6 @@
     <Compile Include="ErrorEventArgs.cs" />
     <Compile Include="WebSocket.cs" />
     <Compile Include="Server\WebSocketServer.cs" />
-    <Compile Include="Server\WebSocketService.cs" />
     <Compile Include="WsStream.cs" />
     <Compile Include="RequestHandshake.cs" />
     <Compile Include="ResponseHandshake.cs" />
@@ -139,7 +139,7 @@
     <Compile Include="Net\WebSockets\TcpListenerWebSocketContext.cs" />
     <Compile Include="Net\WebSockets\WebSocketContext.cs" />
     <Compile Include="Server\ServiceHostManager.cs" />
-    <Compile Include="Server\WebSocketServiceManager.cs" />
+    <Compile Include="Server\WebSocketSessionManager.cs" />
     <Compile Include="Server\HttpRequestEventArgs.cs" />
     <Compile Include="Net\HttpHeaderType.cs" />
     <Compile Include="Net\HttpHeaderInfo.cs" />
