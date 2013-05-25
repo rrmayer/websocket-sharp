@@ -1,6 +1,6 @@
 #region MIT License
 /*
- * WsState.cs
+ * WebSocketState.cs
  *
  * The MIT License
  *
@@ -34,10 +34,10 @@ namespace WebSocketSharp {
   /// Contains the values of the state of the WebSocket connection.
   /// </summary>
   /// <remarks>
-  /// The <b>WsState</b> enumeration contains the values of the state of the WebSocket connection defined in
+  /// The <b>WebSocketState</b> enumeration contains the values of the state of the WebSocket connection defined in
   /// <a href="http://www.w3.org/TR/websockets/#dom-websocket-readystate">The WebSocket API</a>.
   /// </remarks>
-  public enum WsState : ushort
+  public enum WebSocketState : ushort
   {
     /// <summary>
     /// Equivalent to numeric value 0. Indicates that the connection has not yet been established.

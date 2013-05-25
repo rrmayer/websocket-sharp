@@ -85,14 +85,17 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Ext.cs" />
+    <Compile Include="Net\WebSockets\ClientWebSocket.cs" />
+    <Compile Include="Net\WebSockets\ClientWebSocketOptions.cs" />
+    <Compile Include="Net\WebSockets\ServerWebSocket.cs" />
     <Compile Include="Server\IWebSocketService.cs" />
-    <Compile Include="WsState.cs" />
+    <Compile Include="WebSocketState.cs" />
     <Compile Include="MessageEventArgs.cs" />
     <Compile Include="CloseEventArgs.cs" />
     <Compile Include="WsReceivedTooBigMessageException.cs" />
     <Compile Include="ByteOrder.cs" />
     <Compile Include="ErrorEventArgs.cs" />
-    <Compile Include="WebSocket.cs" />
+    <Compile Include="Net\WebSockets\WebSocket.cs" />
     <Compile Include="Server\WebSocketServer.cs" />
     <Compile Include="WsStream.cs" />
     <Compile Include="RequestHandshake.cs" />
@@ -126,7 +129,7 @@
     <Compile Include="Net\HttpStatusCode.cs" />
     <Compile Include="Server\WebSocketServerBase.cs" />
     <Compile Include="Net\Security\SslStream.cs" />
-    <Compile Include="Server\IServiceHost.cs" />
+    <Compile Include="Server\IWebSocketServiceHost.cs" />
     <Compile Include="Server\WebSocketServiceHost.cs" />
     <Compile Include="CloseStatusCode.cs" />
     <Compile Include="Fin.cs" />

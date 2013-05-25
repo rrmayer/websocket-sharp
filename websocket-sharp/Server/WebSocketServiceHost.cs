@@ -43,7 +43,7 @@ namespace WebSocketSharp.Server
     /// <typeparam name="T">
     /// The type of the WebSocket service that the server provides. The T must inherit the <see cref="WebSocketService"/> class.
     /// </typeparam>
-    public class WebSocketServiceHost<T> : IServiceHost
+    public class WebSocketServiceHost<T> : IWebSocketServiceHost
       where T : IWebSocketService, new()
     {
 
@@ -108,12 +108,9 @@ namespace WebSocketSharp.Server
             _serviceImpl.OnOpen(context);
         }
 
-        public IEnumerable<WebSocketContext> CurrentSessions
-        {
-            get { return _sessions.AllSessions; }
-        }
+        public IEnumerable<WebSocketContext> CurrentSessions { get { return _sessions.AllSessions; }}
 
-        #region Public Methods
+            #region Public Methods
 
         /// <summary>
         /// Broadcasts the specified <see cref="string"/> to all clients.

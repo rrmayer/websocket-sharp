@@ -37,7 +37,7 @@ namespace WebSocketSharp.Server
     /// </summary>
     /// <remarks>
     /// </remarks>
-    public interface IServiceHost
+    public interface IWebSocketServiceHost
     {
 
         /// <summary>

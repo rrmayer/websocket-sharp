@@ -38,7 +38,7 @@ namespace WebSocketSharp.Server
     {
         #region Fields
 
-        private readonly ConcurrentDictionary<string, IServiceHost> _svcHosts;
+        private readonly ConcurrentDictionary<string, IWebSocketServiceHost> _svcHosts;
         private bool _autoCleanOldSessions;
 
         #endregion
@@ -47,7 +47,7 @@ namespace WebSocketSharp.Server
 
         public ServiceHostManager()
         {
-            _svcHosts = new ConcurrentDictionary<string, IServiceHost>();
+            _svcHosts = new ConcurrentDictionary<string, IWebSocketServiceHost>();
             _autoCleanOldSessions = true;
         }
 
@@ -71,7 +71,7 @@ namespace WebSocketSharp.Server
             }
         }
 
-        public IEnumerable<IServiceHost> ServiceHosts
+        public IEnumerable<IWebSocketServiceHost> ServiceHosts
         {
             get
             {
@@ -101,7 +101,7 @@ namespace WebSocketSharp.Server
 
         #region Public Methods
 
-        public void Add(string absPath, IServiceHost svcHost)
+        public void Add(string absPath, IWebSocketServiceHost svcHost)
         {
             _svcHosts.TryAdd(absPath.UrlDecode(), svcHost);
         }
@@ -112,7 +112,7 @@ namespace WebSocketSharp.Server
                 svcHost.Broadcast(data);
         }
 
-        public bool TryGetServiceHost(string absPath, out IServiceHost svcHost)
+        public bool TryGetServiceHost(string absPath, out IWebSocketServiceHost svcHost)
         {
             return _svcHosts.TryGetValue(absPath, out svcHost);
         }

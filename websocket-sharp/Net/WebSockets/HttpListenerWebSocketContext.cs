@@ -77,7 +77,7 @@ namespace WebSocketSharp.Net.WebSockets {
     /// <value>
     /// A <see cref="WebSocketSharp.Net.CookieCollection"/> that contains the cookies.
     /// </value>
-    public override CookieCollection CookieCollection {
+    protected override CookieCollection CookieCollection {
       get {
         return _context.Request.Cookies;
       }
@@ -187,7 +187,7 @@ namespace WebSocketSharp.Net.WebSockets {
     /// Gets the WebSocket URI requested by the client.
     /// </summary>
     /// <value>
-    /// A <see cref="Uri"/> that contains the WebSocket URI.
+    /// A <see cref="RequestUri"/> that contains the WebSocket URI.
     /// </value>
     public override Uri RequestUri {
       get {

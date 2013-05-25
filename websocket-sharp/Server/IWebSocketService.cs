@@ -8,5 +8,7 @@ namespace WebSocketSharp.Server
         void OnMessage(WebSocketContext context, MessageEventArgs e);
         void OnClose(WebSocketContext context, CloseEventArgs e);
         void OnError(WebSocketContext context, ErrorEventArgs e);
+
+        IWebSocketServiceHost ServiceHost { set; }
     }
 }

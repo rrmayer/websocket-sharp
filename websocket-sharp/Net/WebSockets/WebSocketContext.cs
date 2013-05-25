@@ -29,8 +29,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Security.Principal;
-using WebSocketSharp.Server;
 
 namespace WebSocketSharp.Net.WebSockets
 {
@@ -52,11 +52,18 @@ namespace WebSocketSharp.Net.WebSockets
         protected WebSocketContext()
         {
             Id = Guid.NewGuid().ToString("N");
+            Properties = new Dictionary<string, object>();
         }
 
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Returns custom properties associated with this context. These can be set through code,
+        /// for instance, to share context-specific details.
+        /// </summary>
+        public Dictionary<string, object> Properties { get; private set; }
 
         /// <summary>
         /// Gets the ID of the <see cref="WebSocketService"/> instance.
@@ -72,7 +79,26 @@ namespace WebSocketSharp.Net.WebSockets
         /// <value>
         /// A <see cref="WebSocketSharp.Net.CookieCollection"/> that contains the cookies.
         /// </value>
-        public abstract CookieCollection CookieCollection { get; }
+        protected abstract CookieCollection CookieCollection { get; }
+
+        /// <summary>
+        /// Gets the cookies used in the WebSocket opening handshake.
+        /// </summary>
+        /// <value>
+        /// An IEnumerable&lt;Cookie&gt; interface that provides an enumerator which supports the iteration
+        /// over the collection of cookies.
+        /// </value>
+        public IEnumerable<Cookie> Cookies
+        {
+            get
+            {
+                lock (CookieCollection.SyncRoot)
+                {
+                    return from Cookie cookie in CookieCollection
+                           select cookie;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the HTTP headers used in the WebSocket opening handshake.
@@ -142,7 +168,7 @@ namespace WebSocketSharp.Net.WebSockets
         /// Gets the WebSocket URI requested by the client.
         /// </summary>
         /// <value>
-        /// A <see cref="Uri"/> that contains the WebSocket URI.
+        /// A <see cref="RequestUri"/> that contains the WebSocket URI.
         /// </value>
         public abstract Uri RequestUri { get; }
 

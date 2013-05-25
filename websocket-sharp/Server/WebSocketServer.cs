@@ -61,7 +61,7 @@ namespace WebSocketSharp.Server
         {
         }
 
-        public IEnumerable<IServiceHost> ServiceHosts
+        public IEnumerable<IWebSocketServiceHost> ServiceHosts
         {
             get { return _svcHosts.ServiceHosts; }
         }
@@ -211,7 +211,7 @@ namespace WebSocketSharp.Server
             var websocket = context.WebSocket;
             var path = context.Path.UrlDecode();
 
-            IServiceHost svcHost;
+            IWebSocketServiceHost svcHost;
             if (!_svcHosts.TryGetServiceHost(path, out svcHost))
             {
                 websocket.Close(HttpStatusCode.NotImplemented);
@@ -253,7 +253,7 @@ namespace WebSocketSharp.Server
         /// <typeparam name="T">
         /// The type of the WebSocket service. The T must inherit the <see cref="WebSocketService"/> class.
         /// </typeparam>
-        public void AddWebSocketService(IServiceHost svcHost, string absPath)
+        public void AddWebSocketService(IWebSocketServiceHost svcHost, string absPath)
         {
             string msg;
             if (!absPath.IsValidAbsolutePath(out msg))
