@@ -11,12 +11,12 @@ namespace WebSocketSharp.Net.WebSockets
         /// Gets or sets the cookies associated with the request.
         /// </summary>
         public CookieContainer Cookies { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the credential information for the client.
         /// </summary>
         public ICredentials Credentials { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the WebSocket protocol keep-alive interval in milliseconds.
         /// </summary>
@@ -30,7 +30,7 @@ namespace WebSocketSharp.Net.WebSockets
         /// <summary>
         /// Gets or sets a Boolean value that indicates if default credentials should be used during WebSocket handshake.
         /// </summary>
-        public bool UseDefaultCredentials { get; set; }
+        //public bool UseDefaultCredentials { get; set; }
 
         /// <summary>
         /// Gets or sets the headers that should be assiociated with this request.
@@ -40,6 +40,9 @@ namespace WebSocketSharp.Net.WebSockets
         public ClientWebSocketOptions()
         {
             Headers = new Dictionary<string, string>();
+            Cookies = new CookieContainer();
+            KeepAliveInterval = TimeSpan.FromSeconds(30);
+            Credentials = new CredentialCache();
         }
 
         //public void AddSubProtocol(string subProtocol)

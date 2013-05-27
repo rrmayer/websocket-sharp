@@ -37,8 +37,7 @@ using System.Text;
 using WebSocketSharp.Net.Security;
 
 namespace WebSocketSharp {
-
-  internal class WsStream : IDisposable
+    public class WsStream : IDisposable
   {
     #region Private Fields
 

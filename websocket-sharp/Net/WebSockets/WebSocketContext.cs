@@ -117,14 +117,6 @@ namespace WebSocketSharp.Net.WebSockets
         public abstract bool IsAuthenticated { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the client connected from the local computer.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if the client connected from the local computer; otherwise, <c>false</c>.
-        /// </value>
-        public abstract bool IsLocal { get; }
-
-        /// <summary>
         /// Gets a value indicating whether the WebSocket connection is secured.
         /// </summary>
         /// <value>
@@ -212,14 +204,6 @@ namespace WebSocketSharp.Net.WebSockets
         /// A <see cref="IPrincipal"/> that contains the client information.
         /// </value>
         public abstract IPrincipal User { get; }
-
-        /// <summary>
-        /// Gets the WebSocket instance used for two-way communication between client and server.
-        /// </summary>
-        /// <value>
-        /// A <see cref="WebSocketSharp.WebSocket"/>.
-        /// </value>
-        public abstract WebSocket WebSocket { get; }
 
         #endregion
     }

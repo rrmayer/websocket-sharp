@@ -9,22 +9,12 @@ namespace WebSocketSharp.Net.WebSockets
 {
     public sealed class ServerWebSocket : WebSocket
     {
-        internal WebSocket(HttpListenerWebSocketContext context)
-            : this()
-        {
-            WebSocketContext = context;
-            _wsStream = context.Stream;
-            _closeContext = context.Close;
-            init(context);
-        }
+        public WebSocketContext Context {get; private set;}
 
-        internal WebSocket(TcpListenerWebSocketContext context)
-            : this()
+        public ServerWebSocket(WebSocketContext context)
         {
-            WebSocketContext = context;
-            _wsStream = context.Stream;
-            _closeContext = context.Close;
-            init(context);
+            Context = context;
+            init();
         }
 
         // As server
@@ -35,8 +25,8 @@ namespace WebSocketSharp.Net.WebSockets
             if (!_extensions.IsEmpty())
                 res.AddHeader("Sec-WebSocket-Extensions", _extensions);
 
-            if (_cookies.Count > 0)
-                res.SetCookies(_cookies);
+            if (Context.Cookies.Any())
+                res.SetCookies(new CookieCollection(Context.Cookies));
 
             return res;
         }
@@ -51,9 +41,10 @@ namespace WebSocketSharp.Net.WebSockets
         }
 
         // As server
-        private void init(WebSocketContext context)
+        private void init()
         {
-            _context = context;
+            _wsStream = Context.Stream;
+            _closeContext = Context.Close;
             _uri = context.Path.ToUri();
             _secure = context.IsSecureConnection;
             _client = false;
@@ -195,7 +186,7 @@ namespace WebSocketSharp.Net.WebSockets
 
         private void close(HttpStatusCode code)
         {
-            if (_readyState != WebSocketState.CONNECTING || _client)
+            if (State != WebSocketState.CONNECTING || _client)
                 return;
 
             sendResponseHandshake(code);
@@ -220,12 +211,12 @@ namespace WebSocketSharp.Net.WebSockets
             lock (_forClose)
             {
                 // Whether the closing handshake has been started already?
-                if (_readyState == WebSocketState.CLOSING ||
-                    _readyState == WebSocketState.CLOSED)
+                if (State == WebSocketState.CLOSING ||
+                    State == WebSocketState.CLOSED)
                     return;
 
                 // Whether the closing handshake on server is started before the connection has been established?
-                if (_readyState == WebSocketState.CONNECTING && !_client)
+                if (State == WebSocketState.CONNECTING && !_client)
                 {
                     sendResponseHandshake(HttpStatusCode.BadRequest);
                     onClose(new CloseEventArgs(data));
@@ -233,7 +224,7 @@ namespace WebSocketSharp.Net.WebSockets
                     return;
                 }
 
-                _readyState = WebSocketState.CLOSING;
+                State = WebSocketState.CLOSING;
             }
 
             // Whether a payload data contains the close status code which must not be set for send?
@@ -251,7 +242,7 @@ namespace WebSocketSharp.Net.WebSockets
 
         private void close(HttpStatusCode code)
         {
-            if (_readyState != WebSocketState.CONNECTING || _client)
+            if (State != WebSocketState.CONNECTING || _client)
                 return;
 
             sendResponseHandshake(code);
@@ -294,28 +285,7 @@ namespace WebSocketSharp.Net.WebSockets
             onClose(args);
         }
 
-        private bool closeResources()
-        {
-            _readyState = WebSocketState.CLOSED;
-
-            try
-            {
-                if (_client)
-                    closeResourcesAsClient();
-                else
-                    closeResourcesAsServer();
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                onError(ex.Message);
-                return false;
-            }
-        }
-
-        // As server
-        private void closeResourcesAsServer()
+        protected override void OnClosing()
         {
             if (!_context.IsNull() && !_closeContext.IsNull())
             {
@@ -323,6 +293,12 @@ namespace WebSocketSharp.Net.WebSockets
                 _wsStream = null;
                 _context = null;
             }
+        }
+
+        // As server
+        private void closeResourcesAsServer()
+        {
+
         }
     }
 }

@@ -85,6 +85,11 @@ namespace WebSocketSharp.Net {
 			list = new List<Cookie> ();
 		}
 
+        public CookieCollection(IEnumerable<Cookie> cookies)
+        {
+            list = new List<Cookie>(cookies);
+        }
+
 		#endregion
 
 		#region Internal Properties

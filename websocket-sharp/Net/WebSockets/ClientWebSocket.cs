@@ -1,13 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace WebSocketSharp.Net.WebSockets
 {
     public sealed class ClientWebSocket : WebSocket
     {
+        private string _base64Key;
+        private const string Guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+        private const string Version = "13";
+
+        public ClientWebSocketOptions Options { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="WebSocket"/> class with the specified WebSocket URL and subprotocols.
         /// </summary>
@@ -23,22 +29,80 @@ namespace WebSocketSharp.Net.WebSockets
         /// <exception cref="ArgumentException">
         /// <paramref name="url"/> is not valid WebSocket URL.
         /// </exception>
-        public ClientWebSocket(string url, params string[] protocols)
+        public ClientWebSocket()
         {
+
+        }
+
+        public Uri ConnectedUri { get; private set; }
+
+        /// <summary>
+        /// Returns true if the ConnectedUri contains "wss"
+        /// </summary>
+        public bool IsSecure { get { return ConnectedUri != null && ConnectedUri.Scheme == "wss"; } }
+
+        // As client
+
+        /// <summary>
+        /// Establishes a WebSocket connection.
+        /// </summary>
+        public void Connect(string url, params string[] protocols)
+        {
+            if (isOpened(true))
+                throw new InvalidOperationException(
+                    "The WebSocket is currently connected.");
+
             if (url.IsNull())
                 throw new ArgumentNullException("url");
 
             Uri uri;
-            string msg;
-            if (!url.TryCreateWebSocketUri(out uri, out msg))
-                throw new ArgumentException(msg, "url");
+            string error;
+            if (!url.TryCreateWebSocketUri(out uri, out error))
+                throw new ArgumentException(error, "url");
 
-            _uri = uri;
-            _protocols = protocols.ToString(", ");
-            _client = true;
-            _secure = uri.Scheme == "wss"
-                          ? true
-                          : false;
+            ConnectedUri = uri;
+            SubProtocol = protocols.ToString(", ");
+            var host = uri.DnsSafeHost;
+            var port = uri.Port;
+            var client = new TcpClient(host, port);
+            _wsStream = WsStream.CreateClientStream(client, host, IsSecure);
+
+            try
+            {
+                if (doHandshake())
+                    onOpen();
+            }
+            catch (Exception ex)
+            {
+                var msg = "An exception has occured: " + ex.GetType().Name + ". " + ex.Message;
+                onError(msg);
+                Close(CloseStatusCode.ABNORMAL, msg);
+            }
+        }
+
+        private static string createBase64Key()
+        {
+            var src = new byte[16];
+            var rand = new Random();
+            rand.NextBytes(src);
+
+            return Convert.ToBase64String(src);
+        }
+
+        private string createResponseKey()
+        {
+            SHA1 sha1 = new SHA1CryptoServiceProvider();
+            var sb = new StringBuilder(_base64Key);
+            sb.Append(Guid);
+            var src = sha1.ComputeHash(Encoding.UTF8.GetBytes(sb.ToString()));
+
+            return Convert.ToBase64String(src);
+        }
+
+        private static bool isCompressExtension(string value, CompressionMethod method)
+        {
+            var expected = createCompressExtension(method);
+            return (expected.IsEmpty() && value.Equals(expected));
         }
 
         // As client
@@ -55,7 +119,7 @@ namespace WebSocketSharp.Net.WebSockets
         }
 
         // As client
-        private RequestHandshake createRequestHandshake()
+        private RequestHandshake createRequestHandshake(Uri _uri)
         {
             var path = _uri.PathAndQuery;
             var host = _uri.Port == 80
@@ -68,19 +132,19 @@ namespace WebSocketSharp.Net.WebSockets
             if (!_origin.IsEmpty())
                 req.AddHeader("Origin", _origin);
 
-            req.AddHeader("Sec-WebSocket-Key", _base64key);
+            req.AddHeader("Sec-WebSocket-Key", _base64Key);
 
-            if (!_protocols.IsNullOrEmpty())
-                req.AddHeader("Sec-WebSocket-Protocol", _protocols);
+            if (!SubProtocol.IsNullOrEmpty())
+                req.AddHeader("Sec-WebSocket-Protocol", SubProtocol);
 
             var extensions = createRequestExtensions();
             if (!extensions.IsEmpty())
                 req.AddHeader("Sec-WebSocket-Extensions", extensions);
 
-            req.AddHeader("Sec-WebSocket-Version", _version);
+            req.AddHeader("Sec-WebSocket-Version", Version);
 
-            if (_cookies.Count > 0)
-                req.SetCookies(_cookies);
+            if (Options.Cookies.Count > 0)
+                req.SetCookies(new CookieCollection(Options.Cookies.GetCookies(_uri).OfType<Cookie>()));
 
             return req;
         }
@@ -94,32 +158,45 @@ namespace WebSocketSharp.Net.WebSockets
         }
 
         // As client
+        private ResponseHandshake receiveResponseHandshake()
+        {
+            var res = ResponseHandshake.Parse(readHandshake());
+#if DEBUG
+            Console.WriteLine("WS: Info@receiveResponseHandshake: Response handshake from server:\n");
+            Console.WriteLine(res.ToString());
+#endif
+            return res;
+        }
+
+        // As client
+        private void send(RequestHandshake request)
+        {
+#if DEBUG
+            Console.WriteLine("WS: Info@send: Request handshake to server:\n");
+            Console.WriteLine(request.ToString());
+#endif
+            _wsStream.Write(request);
+        }
+
+        // As client
         private void init()
         {
-            _base64key = createBase64Key();
-
-            var host = _uri.DnsSafeHost;
-            var port = _uri.Port;
-            _tcpClient = new TcpClient(host, port);
-            _wsStream = WsStream.CreateClientStream(_tcpClient, host, _secure);
+            _base64Key = createBase64Key();
         }
 
         // As client
         private bool isValidResponseHandshake(ResponseHandshake response)
         {
-            return !response.IsWebSocketResponse
-                   ? false
-                   : !response.HeaderExists("Sec-WebSocket-Accept", createResponseKey())
-                     ? false
-                     : !response.HeaderExists("Sec-WebSocket-Version") ||
-                       response.HeaderExists("Sec-WebSocket-Version", _version);
+            return response.IsWebSocketResponse &&
+                (response.HeaderExists("Sec-WebSocket-Accept", createResponseKey()) &&
+                (!response.HeaderExists("Sec-WebSocket-Version") || response.HeaderExists("Sec-WebSocket-Version", Version)));
         }
 
         // As client
         private void processResponseCookies(CookieCollection cookies)
         {
-            if (cookies.Count > 0)
-                _cookies.SetOrRemove(cookies);
+            foreach (Cookie c in cookies)
+                Options.Cookies.Add(c);
         }
 
         // As client
@@ -166,7 +243,7 @@ namespace WebSocketSharp.Net.WebSockets
         private void processResponseProtocol(string protocol)
         {
             if (!protocol.IsNullOrEmpty())
-                _protocol = protocol;
+                SubProtocol = protocol;
         }
 
         // As client
@@ -178,7 +255,7 @@ namespace WebSocketSharp.Net.WebSockets
 
 
         // As client
-        private void closeResourcesAsClient()
+        protected override void OnClosing()
         {
             if (!_wsStream.IsNull())
             {
@@ -186,11 +263,11 @@ namespace WebSocketSharp.Net.WebSockets
                 _wsStream = null;
             }
 
-            if (!_tcpClient.IsNull())
-            {
-                _tcpClient.Close();
-                _tcpClient = null;
-            }
+            if (UnderlyingStream.IsNull())
+                return;
+
+            UnderlyingStream.Close();
+            UnderlyingStream = null;
         }
     }
 }

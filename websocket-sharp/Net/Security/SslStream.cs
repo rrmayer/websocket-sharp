@@ -31,8 +31,7 @@ using System.Net.Security;
 using System.Net.Sockets;
 
 namespace WebSocketSharp.Net.Security {
-
-  internal class SslStream : System.Net.Security.SslStream
+    public class SslStream : System.Net.Security.SslStream
   {
     #region Constructors
 
