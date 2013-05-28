@@ -45,7 +45,7 @@ namespace WebSocketSharp.Net {
 	/// </remarks>
 	public sealed class HttpListenerContext {
 
-		#region Private Fields
+		
 
 		HttpConnection       cnc;
 		string               error;
@@ -54,15 +54,15 @@ namespace WebSocketSharp.Net {
 		HttpListenerResponse response;
 		IPrincipal           user;
 
-		#endregion
+		
 
-		#region Internal Fields
+		
 
 		internal HttpListener Listener;
 
-		#endregion
+		
 
-		#region Constructor
+		
 
 		internal HttpListenerContext (HttpConnection cnc)
 		{
@@ -72,9 +72,9 @@ namespace WebSocketSharp.Net {
 			response   = new HttpListenerResponse (this);
 		}
 
-		#endregion
+		
 
-		#region Internal Properties
+		
 
 		internal HttpConnection Connection {
 			get { return cnc; }
@@ -94,9 +94,9 @@ namespace WebSocketSharp.Net {
 			get { return (error != null); }
 		}
 
-		#endregion
+		
 
-		#region Public Properties
+		
 
 		/// <summary>
 		/// Gets the <see cref="HttpListenerRequest"/> that contains the HTTP request from a client.
@@ -129,9 +129,9 @@ namespace WebSocketSharp.Net {
 			get { return user; }
 		}
 
-		#endregion
+		
 
-		#region Internal Methods
+		
 
 		internal void ParseAuthentication (AuthenticationSchemes expectedSchemes)
 		{
@@ -190,9 +190,9 @@ namespace WebSocketSharp.Net {
 			} 
 		}
 
-		#endregion
+		
 
-		#region Public Method
+		
 
 		/// <summary>
 		/// Accepts a WebSocket connection by the <see cref="HttpListener"/>.
@@ -205,6 +205,6 @@ namespace WebSocketSharp.Net {
 			return new HttpListenerWebSocketContext (this);
 		}
 
-		#endregion
+		
 	}
 }

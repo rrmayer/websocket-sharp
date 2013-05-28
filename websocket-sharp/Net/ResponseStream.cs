@@ -42,13 +42,13 @@ namespace WebSocketSharp.Net {
 	// what if we don't set content-length at all?
 	class ResponseStream : Stream {
 
-		#region Private Static Field
+		
 
 		static byte [] crlf = new byte [] { 13, 10 };
 
-		#endregion
+		
 
-		#region Private Fields
+		
 
 		bool                 disposed;
 		bool                 ignore_errors;
@@ -56,9 +56,9 @@ namespace WebSocketSharp.Net {
 		Stream               stream;
 		bool                 trailer_sent;
 
-		#endregion
+		
 
-		#region Constructor
+		
 
 		internal ResponseStream (System.IO.Stream stream, HttpListenerResponse response, bool ignore_errors)
 		{
@@ -67,9 +67,9 @@ namespace WebSocketSharp.Net {
 			this.ignore_errors = ignore_errors;
 		}
 
-		#endregion
+		
 
-		#region Properties
+		
 
 		public override bool CanRead {
 			get { return false; }
@@ -92,9 +92,9 @@ namespace WebSocketSharp.Net {
 			set { throw new NotSupportedException (); }
 		}
 
-		#endregion
+		
 
-		#region Private Methods
+		
 
 		static byte [] GetChunkSizeBytes (int size, bool final)
 		{
@@ -113,9 +113,9 @@ namespace WebSocketSharp.Net {
 			return ms;
 		}
 
-		#endregion
+		
 
-		#region Internal Method
+		
 
 		internal void InternalWrite (byte [] buffer, int offset, int count)
 		{
@@ -129,9 +129,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion
+		
 
-		#region Public Methods
+		
 
 		public override IAsyncResult BeginRead (
 			byte [] buffer,
@@ -279,6 +279,6 @@ namespace WebSocketSharp.Net {
 				InternalWrite (crlf, 0, 2);
 		}
 
-		#endregion
+		
 	}
 }

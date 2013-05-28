@@ -47,14 +47,14 @@ namespace WebSocketSharp.Net {
 	/// </remarks>
 	public sealed class HttpListenerRequest {
 
-		#region Private Static Fields
+		
 
 		static char [] separators   = new char [] { ' ' };
 		static byte [] _100continue = Encoding.ASCII.GetBytes ("HTTP/1.1 100 Continue\r\n\r\n");
 
-		#endregion
+		
 
-		#region Private Fields
+		
 
 		string []           accept_types;
 //		int                 client_cert_error;
@@ -77,9 +77,9 @@ namespace WebSocketSharp.Net {
 		Uri                 url;
 		string []           user_languages;
 
-		#endregion
+		
 
-		#region Constructor
+		
 
 		internal HttpListenerRequest (HttpListenerContext context)
 		{
@@ -88,9 +88,9 @@ namespace WebSocketSharp.Net {
 			version = HttpVersion.Version10;
 		}
 
-		#endregion
+		
 
-		#region Properties
+		
 
 		/// <summary>
 		/// Gets the media types which are acceptable for the response.
@@ -427,9 +427,9 @@ namespace WebSocketSharp.Net {
 			get { return user_languages; }
 		}
 
-		#endregion
+		
 
-		#region Private Methods
+		
 
 		void CreateQueryString (string query)
 		{
@@ -454,9 +454,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion
+		
 
-		#region Internal Methods
+		
 
 		internal void AddHeader (string header)
 		{
@@ -677,9 +677,9 @@ namespace WebSocketSharp.Net {
 			return str.Trim ();
 		}
 
-		#endregion
+		
 
-		#region Public Methods
+		
 
 		/// <summary>
 		/// Begins getting the client's X.509 v.3 certificate asynchronously.
@@ -743,6 +743,6 @@ namespace WebSocketSharp.Net {
 			throw new NotImplementedException ();
 		}
 
-		#endregion
+		
 	}
 }

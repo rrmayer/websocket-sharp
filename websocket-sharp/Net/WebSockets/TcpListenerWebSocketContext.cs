@@ -1,4 +1,4 @@
-#region MIT License
+
 /*
  * TcpListenerWebSocketContext.cs
  *
@@ -24,11 +24,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Net;
 using System.Net.Sockets;
 using System.Security.Principal;
 
@@ -42,43 +43,26 @@ namespace WebSocketSharp.Net.WebSockets
     /// </remarks>
     public class TcpListenerWebSocketContext : WebSocketContext
     {
-        #region Fields
+        
 
         private CookieCollection _cookies;
-        private TcpClient _tcpClient;
-        private bool _isSecure;
-        private RequestHandshake _request;
-        private WebSocket _websocket;
-        private WsStream _wsStream;
+        private readonly TcpClient _tcpClient;
+        private readonly RequestHandshake _request;
 
-        #endregion
+        
 
-        #region Constructor
+        
 
-        internal TcpListenerWebSocketContext(TcpClient tcpClient, bool secure)
+        internal TcpListenerWebSocketContext(RequestHandshake handshake, TcpClient client, bool isSecure)
         {
-            _tcpClient = tcpClient;
-            _isSecure = secure;
-            _wsStream = WsStream.CreateServerStream(tcpClient, secure);
-            _request = RequestHandshake.Parse(_wsStream.ReadHandshake());
-            _websocket = new WebSocket(this);
+            _tcpClient = client;
+            _request = handshake;
+            IsSecure = isSecure;
         }
 
-        #endregion
+        
 
-        #region Internal Properties
-
-        internal WsStream Stream
-        {
-            get
-            {
-                return _wsStream;
-            }
-        }
-
-        #endregion
-
-        #region Public Properties
+        
 
         /// <summary>
         /// Gets the cookies used in the WebSocket opening handshake.
@@ -91,7 +75,7 @@ namespace WebSocketSharp.Net.WebSockets
             get
             {
                 if (_cookies.IsNull())
-                    _cookies = _request.Cookies;
+                    _cookies = _request.Headers.GetCookies(false);
 
                 return _cookies;
             }
@@ -120,39 +104,12 @@ namespace WebSocketSharp.Net.WebSockets
         /// <exception cref="NotImplementedException">
         /// This property is not implemented.
         /// </exception>
-        public override bool IsAuthenticated
+        public ICredentials Credentials
         {
             get
             {
                 throw new NotImplementedException();
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the client connected from the local computer.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if the client connected from the local computer; otherwise, <c>false</c>.
-        /// </value>
-        public override bool IsLocal
-        {
-            get
-            {
-                return UserEndPoint.Address.IsLocal();
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the WebSocket connection is secured.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if the WebSocket connection is secured; otherwise, <c>false</c>.
-        /// </value>
-        public override bool IsSecureConnection
-        {
-            get
-            {
-                return _isSecure;
+                //var bareturn Headers.Get("AUTHORIZATION")
             }
         }
 
@@ -322,30 +279,6 @@ namespace WebSocketSharp.Net.WebSockets
             }
         }
 
-        /// <summary>
-        /// Gets the WebSocket instance used for two-way communication between client and server.
-        /// </summary>
-        /// <value>
-        /// A <see cref="WebSocketSharp.WebSocket"/>.
-        /// </value>
-        public override WebSocket WebSocket
-        {
-            get
-            {
-                return _websocket;
-            }
-        }
-
-        #endregion
-
-        #region Internal Method
-
-        internal void Close()
-        {
-            _wsStream.Close();
-            _tcpClient.Close();
-        }
-
-        #endregion
+        
     }
 }

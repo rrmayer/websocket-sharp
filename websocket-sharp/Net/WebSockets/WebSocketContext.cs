@@ -1,4 +1,4 @@
-#region MIT License
+
 /*
  * WebSocketContext.cs
  *
@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using System.Collections.Generic;
@@ -44,7 +44,7 @@ namespace WebSocketSharp.Net.WebSockets
     public abstract class WebSocketContext
     {
 
-        #region Constructor
+        
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WebSocketSharp.Net.WebSockets.WebSocketContext"/> class.
@@ -55,9 +55,9 @@ namespace WebSocketSharp.Net.WebSockets
             Properties = new Dictionary<string, object>();
         }
 
-        #endregion
+        
 
-        #region Properties
+        
 
         /// <summary>
         /// Returns custom properties associated with this context. These can be set through code,
@@ -122,7 +122,7 @@ namespace WebSocketSharp.Net.WebSockets
         /// <value>
         /// <c>true</c> if the WebSocket connection is secured; otherwise, <c>false</c>.
         /// </value>
-        public abstract bool IsSecureConnection { get; }
+        public bool IsSecure { get; protected set; }
 
         /// <summary>
         /// Gets a value indicating whether the WebSocket connection request is valid.
@@ -205,6 +205,6 @@ namespace WebSocketSharp.Net.WebSockets
         /// </value>
         public abstract IPrincipal User { get; }
 
-        #endregion
+        
     }
 }

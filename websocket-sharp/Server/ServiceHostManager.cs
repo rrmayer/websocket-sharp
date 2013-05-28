@@ -1,4 +1,4 @@
-#region MIT License
+
 /*
  * ServiceHostManager.cs
  *
@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System.Collections.Generic;
 using System.Collections.Concurrent;
@@ -36,14 +36,14 @@ namespace WebSocketSharp.Server
 
     internal class ServiceHostManager
     {
-        #region Fields
+        
 
         private readonly ConcurrentDictionary<string, IWebSocketServiceHost> _svcHosts;
         private bool _autoCleanOldSessions;
 
-        #endregion
+        
 
-        #region Constructor
+        
 
         public ServiceHostManager()
         {
@@ -51,9 +51,9 @@ namespace WebSocketSharp.Server
             _autoCleanOldSessions = true;
         }
 
-        #endregion
+        
 
-        #region Properties
+        
 
         public int Count
         {
@@ -97,9 +97,9 @@ namespace WebSocketSharp.Server
             }
         }
 
-        #endregion
+        
 
-        #region Public Methods
+        
 
         public void Add(string absPath, IWebSocketServiceHost svcHost)
         {
@@ -125,6 +125,6 @@ namespace WebSocketSharp.Server
             Parallel.ForEach(q, session => session.WebSocket.Close(CloseStatusCode.AWAY, "Server shutting down."));
         }
 
-        #endregion
+        
     }
 }

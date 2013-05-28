@@ -37,21 +37,21 @@ namespace WebSocketSharp.Net {
 
 	sealed class EndPointManager {
 
-		#region Fields
+		
 
 		static Dictionary<IPAddress, Dictionary<int, EndPointListener>> ip_to_endpoints = new Dictionary<IPAddress, Dictionary<int, EndPointListener>> ();
 
-		#endregion
+		
 
-		#region Constructor
+		
 
 		private EndPointManager ()
 		{
 		}
 
-		#endregion
+		
 
-		#region Private Methods
+		
 
 		static void AddPrefixInternal (string p, HttpListener listener)
 		{
@@ -101,9 +101,9 @@ namespace WebSocketSharp.Net {
 			epl.RemovePrefix (lp, listener);
 		}
 
-		#endregion
+		
 
-		#region Public Methods
+		
 
 		public static void AddListener (HttpListener listener)
 		{
@@ -159,6 +159,6 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion
+		
 	}
 }

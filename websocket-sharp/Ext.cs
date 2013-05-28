@@ -1,4 +1,4 @@
-#region License
+
 /*
  * Ext.cs
  *  IsPredefinedScheme and MaybeUri methods derived from System.Uri.cs
@@ -36,7 +36,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using System.Collections.Generic;
@@ -58,13 +58,13 @@ namespace WebSocketSharp
     public static class Ext
     {
 
-        #region Private Const Fields
+        
 
         private const string _tspecials = "()<>@,;:\\\"/[]?={} \t";
 
-        #endregion
+        
 
-        #region Private Methods
+        
 
         private static byte[] compress(this byte[] value)
         {
@@ -149,9 +149,9 @@ namespace WebSocketSharp
                 act();
         }
 
-        #endregion
+        
 
-        #region Internal Methods
+        
 
         internal static byte[] Append(this ushort code, string reason)
         {
@@ -295,9 +295,9 @@ namespace WebSocketSharp
                 yield return buffer.ToString();
         }
 
-        #endregion
+        
 
-        #region Public Methods
+        
 
         /// <summary>
         /// Accepts a WebSocket connection by the <see cref="TcpListener"/>.
@@ -1651,6 +1651,6 @@ namespace WebSocketSharp
             output.Close();
         }
 
-        #endregion
+        
     }
 }

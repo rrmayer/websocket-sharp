@@ -52,16 +52,16 @@ namespace WebSocketSharp.Net {
 	[ComVisible (true)]
 	public class WebHeaderCollection : NameValueCollection, ISerializable {
 
-		#region Fields
+		
 
 		static readonly Dictionary<string, HttpHeaderInfo> headers;
 
 		bool           internallyCreated;
 		HttpHeaderType state;
 
-		#endregion
+		
 
-		#region Constructors
+		
 
 		static WebHeaderCollection () 
 		{
@@ -302,9 +302,9 @@ namespace WebSocketSharp.Net {
 			state = HttpHeaderType.Undefined;
 		}
 
-		#endregion
+		
 
-		#region Properties
+		
 
 		/// <summary>
 		/// Gets all header names in the collection.
@@ -419,9 +419,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion
+		
 
-		#region Private Methods
+		
 
 		void Add (string name, string value, bool ignoreRestricted)
 		{
@@ -587,9 +587,9 @@ namespace WebSocketSharp.Net {
 			       : true;
 		}
 
-		#endregion
+		
 
-		#region Internal Methods
+		
 
 		internal static string Convert (HttpRequestHeader header)
 		{
@@ -660,9 +660,9 @@ namespace WebSocketSharp.Net {
 			return sb.Append ("\r\n").ToString ();
 		}
 
-		#endregion
+		
 
-		#region Explicit Interface Implementation
+		
 
 		/// <summary>
 		/// Populates the specified <see cref="SerializationInfo"/> with the data to need to
@@ -684,9 +684,9 @@ namespace WebSocketSharp.Net {
 			GetObjectData (serializationInfo, streamingContext);
 		}
 
-		#endregion
+		
 
-		#region Protected Methods
+		
 
 		/// <summary>
 		/// Adds a header to the collection without checking whether the header is on the restricted header list.
@@ -714,9 +714,9 @@ namespace WebSocketSharp.Net {
 			Add (headerName, headerValue, true);
 		}
 
-		#endregion
+		
 
-		#region Public Methods
+		
 
 		/// <summary>
 		/// Adds the specified <paramref name="header"/> to the collection.
@@ -1224,6 +1224,6 @@ namespace WebSocketSharp.Net {
 			return sb.Append ("\r\n").ToString ();
 		}
 
-		#endregion
+		
 	}
 }

@@ -1,4 +1,4 @@
-#region MIT License
+
 /*
  * SslStream.cs
  *
@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using System.Net.Security;
@@ -33,7 +33,7 @@ using System.Net.Sockets;
 namespace WebSocketSharp.Net.Security {
     public class SslStream : System.Net.Security.SslStream
   {
-    #region Constructors
+    
 
     public SslStream(NetworkStream innerStream)
       : base(innerStream)
@@ -67,9 +67,9 @@ namespace WebSocketSharp.Net.Security {
     {
     }
 
-    #endregion
+    
 
-    #region Property
+    
 
     public bool DataAvailable {
       get {
@@ -77,6 +77,6 @@ namespace WebSocketSharp.Net.Security {
       }
     }
 
-    #endregion
+    
   }
 }

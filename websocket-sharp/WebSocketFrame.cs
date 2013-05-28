@@ -1,4 +1,4 @@
-#region License
+
 /*
  * WsFrame.cs
  *
@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using System.IO;
@@ -34,40 +34,40 @@ using System.Text;
 
 namespace WebSocketSharp {
 
-  internal class WsFrame : IEnumerable<byte>
+  internal class WebSocketFrame : IEnumerable<byte>
   {
-    #region Private Const Fields
+    
 
-    private const int _readBufferLen = 1024;
+    private const int ReadBufferLen = 1024;
 
-    #endregion
+    
 
-    #region Private Constructors
+    
 
-    private WsFrame()
+    private WebSocketFrame()
     {
     }
 
-    #endregion
+    
 
-    #region Public Constructors
+    
 
-    public WsFrame(Opcode opcode, PayloadData payloadData)
+    public WebSocketFrame(Opcode opcode, PayloadData payloadData)
       : this(opcode, Mask.MASK, payloadData)
     {
     }
 
-    public WsFrame(Opcode opcode, Mask mask, PayloadData payloadData)
+    public WebSocketFrame(Opcode opcode, Mask mask, PayloadData payloadData)
       : this(Fin.FINAL, opcode, mask, payloadData)
     {
     }
 
-    public WsFrame(Fin fin, Opcode opcode, Mask mask, PayloadData payloadData)
+    public WebSocketFrame(Fin fin, Opcode opcode, Mask mask, PayloadData payloadData)
       : this(fin, opcode, mask, payloadData, CompressionMethod.NONE)
     {
     }
 
-    public WsFrame(
+    public WebSocketFrame(
       Fin fin, Opcode opcode, Mask mask, PayloadData payloadData, CompressionMethod compress)
     {
       if (payloadData.IsNull())
@@ -96,9 +96,9 @@ namespace WebSocketSharp {
       init();
     }
 
-    #endregion
+    
 
-    #region Internal Properties
+    
 
     internal bool IsBinary {
       get {
@@ -191,9 +191,9 @@ namespace WebSocketSharp {
       }
     }
 
-    #endregion
+    
 
-    #region Public Properties
+    
 
     public Fin Fin { get; private set; }
 
@@ -215,9 +215,9 @@ namespace WebSocketSharp {
 
     public PayloadData PayloadData { get; private set; }
 
-    #endregion
+    
 
-    #region Private Methods
+    
 
     private bool compressPayloadData(CompressionMethod method)
     {
@@ -239,7 +239,7 @@ namespace WebSocketSharp {
       return true;
     }
 
-    private static void dump(WsFrame frame)
+    private static void dump(WebSocketFrame frame)
     {
       var len = frame.Length;
       var count = (long)(len / 4);
@@ -378,7 +378,7 @@ namespace WebSocketSharp {
       PayloadData.Mask(key);
     }
 
-    private static WsFrame parse(byte[] header, Stream stream, bool unmask)
+    private static WebSocketFrame parse(byte[] header, Stream stream, bool unmask)
     {
       if (header.IsNull() || header.Length != 2)
         return null;
@@ -391,7 +391,7 @@ namespace WebSocketSharp {
       return frame;
     }
 
-    private static void print(WsFrame frame)
+    private static void print(WebSocketFrame frame)
     {
       var len = frame.ExtPayloadLen.Length;
       var extPayloadLen = len == 2
@@ -428,7 +428,7 @@ namespace WebSocketSharp {
         format, frame.Fin, frame.Rsv1, frame.Rsv2, frame.Rsv3, opcode, frame.Mask, frame.PayloadLen, extPayloadLen, maskingKey, payloadData);
     }
 
-    private static void readExtPayloadLen(Stream stream, WsFrame frame)
+    private static void readExtPayloadLen(Stream stream, WebSocketFrame frame)
     {
       int length = frame.PayloadLen <= 125
                  ? 0
@@ -449,7 +449,7 @@ namespace WebSocketSharp {
       frame.ExtPayloadLen = extPayloadLen;
     }
 
-    private static WsFrame readHeader(byte[] header)
+    private static WebSocketFrame readHeader(byte[] header)
     {
       // FIN
       Fin fin = (header[0] & 0x80) == 0x80 ? Fin.FINAL : Fin.MORE;
@@ -466,7 +466,7 @@ namespace WebSocketSharp {
       // Payload len
       byte payloadLen = (byte)(header[1] & 0x7f);
 
-      return new WsFrame {
+      return new WebSocketFrame {
         Fin = fin,
         Rsv1 = rsv1,
         Rsv2 = rsv2,
@@ -477,7 +477,7 @@ namespace WebSocketSharp {
       };
     }
 
-    private static void readMaskingKey(Stream stream, WsFrame frame)
+    private static void readMaskingKey(Stream stream, WebSocketFrame frame)
     {
       if (!isMasked(frame.Mask))
       {
@@ -492,7 +492,7 @@ namespace WebSocketSharp {
       frame.MaskingKey = maskingKey;
     }
 
-    private static void readPayloadData(Stream stream, WsFrame frame, bool unmask)
+    private static void readPayloadData(Stream stream, WebSocketFrame frame, bool unmask)
     {
       ulong length = frame.PayloadLen <= 125
                    ? frame.PayloadLen
@@ -509,9 +509,9 @@ namespace WebSocketSharp {
       if (frame.PayloadLen > 126 && length > PayloadData.MaxLength)
         throw new WsReceivedTooBigMessageException();
 
-      var buffer = length <= (ulong)_readBufferLen
+      var buffer = length <= (ulong)ReadBufferLen
                  ? stream.ReadBytes((int)length)
-                 : stream.ReadBytes((long)length, _readBufferLen);
+                 : stream.ReadBytes((long)length, ReadBufferLen);
 
       if (buffer.LongLength != (long)length)
         throw new IOException();
@@ -558,9 +558,9 @@ namespace WebSocketSharp {
       MaskingKey = new byte[]{};
     }
 
-    #endregion
+    
 
-    #region Internal Methods
+    
 
     internal void Decompress(CompressionMethod method)
     {
@@ -571,9 +571,9 @@ namespace WebSocketSharp {
         setPayloadLen(PayloadData.Length);
     }
 
-    #endregion
+    
 
-    #region Public Methods
+    
 
     public IEnumerator<byte> GetEnumerator()
     {
@@ -581,17 +581,17 @@ namespace WebSocketSharp {
         yield return b;
     }
 
-    public static WsFrame Parse(byte[] src)
+    public static WebSocketFrame Parse(byte[] src)
     {
       return Parse(src, true);
     }
 
-    public static WsFrame Parse(Stream stream)
+    public static WebSocketFrame Parse(Stream stream)
     {
       return Parse(stream, true);
     }
 
-    public static WsFrame Parse(byte[] src, bool unmask)
+    public static WebSocketFrame Parse(byte[] src, bool unmask)
     {
       using (MemoryStream ms = new MemoryStream(src))
       {
@@ -599,14 +599,14 @@ namespace WebSocketSharp {
       }
     }
 
-    public static WsFrame Parse(Stream stream, bool unmask)
+    public static WebSocketFrame Parse(Stream stream, bool unmask)
     {
       return Parse(stream, unmask, null);
     }
 
-    public static WsFrame Parse(Stream stream, bool unmask, Action<Exception> error)
+    public static WebSocketFrame Parse(Stream stream, bool unmask, Action<Exception> error)
     {
-      WsFrame frame = null;
+      WebSocketFrame frame = null;
       try
       {
         var header = stream.ReadBytes(2);
@@ -621,23 +621,23 @@ namespace WebSocketSharp {
       return frame;
     }
 
-    public static void ParseAsync(Stream stream, Action<WsFrame> completed)
+    public static void ParseAsync(Stream stream, Action<WebSocketFrame> completed)
     {
       ParseAsync(stream, true, completed, null);
     }
 
-    public static void ParseAsync(Stream stream, Action<WsFrame> completed, Action<Exception> error)
+    public static void ParseAsync(Stream stream, Action<WebSocketFrame> completed, Action<Exception> error)
     {
       ParseAsync(stream, true, completed, error);
     }
 
     public static void ParseAsync(
-      Stream stream, bool unmask, Action<WsFrame> completed, Action<Exception> error)
+      Stream stream, bool unmask, Action<WebSocketFrame> completed, Action<Exception> error)
     {
       var header = new byte[2];
       AsyncCallback callback = ar =>
       {
-        WsFrame frame = null;
+        WebSocketFrame frame = null;
         try
         {
           int readLen = stream.EndRead(ar);
@@ -704,15 +704,15 @@ namespace WebSocketSharp {
       return BitConverter.ToString(ToByteArray());
     }
 
-    #endregion
+    
 
-    #region Explicitly Implemented Interface Members
+    
 
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
     }
 
-    #endregion
+    
   }
 }

@@ -1,4 +1,4 @@
-#region License
+
 /*
  * RequestHandshake.cs
  *
@@ -24,35 +24,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using WebSocketSharp.Net;
 using WebSocketSharp.Net.WebSockets;
 
 namespace WebSocketSharp
 {
-
     internal class RequestHandshake : Handshake
     {
-        #region Private Fields
+        private const string Version = "13";
+        private string _base64Key;
 
         private NameValueCollection _queryString;
-
-        #endregion
-
-        #region Private Constructors
-
-        private RequestHandshake()
-        {
-        }
-
-        #endregion
-
-        #region Public Constructors
 
         public RequestHandshake(string uriString)
         {
@@ -61,11 +50,45 @@ namespace WebSocketSharp
             AddHeader("User-Agent", "websocket-sharp/1.0");
             AddHeader("Upgrade", "websocket");
             AddHeader("Connection", "Upgrade");
+            AddHeader("Sec-WebSocket-Version", Version);
+            _base64Key = createBase64Key();
+
+            AddHeader("Sec-WebSocket-Key", _base64Key);
         }
 
-        #endregion
+        private static string createBase64Key()
+        {
+            var src = new byte[16];
+            var rand = new Random();
+            rand.NextBytes(src);
 
-        #region Public Properties
+            return Convert.ToBase64String(src);
+        }
+
+        public bool IsCorrespondingResponse(ResponseHandshake response)
+        {
+            return response.IsWebSocketResponse
+                    && response.HeaderExists("Sec-WebSocket-Accept", createResponseKey())
+                    && (!response.HeaderExists("Sec-WebSocket-Version") || response.HeaderExists("Sec-WebSocket-Version", Version));
+        }
+
+        private string createResponseKey()
+        {
+            SHA1 sha1 = new SHA1CryptoServiceProvider();
+            var sb = new StringBuilder(_base64Key);
+            sb.Append(Guid);
+            var src = sha1.ComputeHash(Encoding.UTF8.GetBytes(sb.ToString()));
+
+            return Convert.ToBase64String(src);
+        }
+
+        public bool IsValid
+        {
+            get
+            {
+                return Headers.Exists("Sec-WebSocket-Version", Version);
+            }
+        }
 
         public string HttpMethod { get; private set; }
 
@@ -74,18 +97,12 @@ namespace WebSocketSharp
             get
             {
                 return HttpMethod != "GET"
-                       ? false
-                       : ProtocolVersion < HttpVersion.Version11
-                         ? false
-                         : !HeaderExists("Upgrade", "websocket")
-                           ? false
-                           : !HeaderExists("Connection", "Upgrade")
-                             ? false
-                             : !HeaderExists("Host")
-                               ? false
-                               : !HeaderExists("Sec-WebSocket-Key")
-                                 ? false
-                                 : HeaderExists("Sec-WebSocket-Version");
+                       && ProtocolVersion < HttpVersion.Version11
+                       && !HeaderExists("Upgrade", "websocket")
+                       && !HeaderExists("Connection", "Upgrade")
+                       && !HeaderExists("Host")
+                       && !HeaderExists("Sec-WebSocket-Key")
+                       && HeaderExists("Sec-WebSocket-Version");
             }
         }
 
@@ -130,10 +147,6 @@ namespace WebSocketSharp
         }
 
         public Uri RequestUri { get; private set; }
-
-        #endregion
-
-        #region Public Methods
 
         public static RequestHandshake Parse(string[] request)
         {
@@ -192,7 +205,5 @@ namespace WebSocketSharp
             buffer.Append(_crlf);
             return buffer.ToString();
         }
-
-        #endregion
     }
 }

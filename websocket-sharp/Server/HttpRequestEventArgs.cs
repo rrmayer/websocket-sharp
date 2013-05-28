@@ -1,4 +1,4 @@
-#region MIT License
+
 /*
  * HttpRequestEventArgs.cs
  *
@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using WebSocketSharp.Net;
@@ -41,7 +41,7 @@ namespace WebSocketSharp.Server {
   /// </remarks>
   public class HttpRequestEventArgs : EventArgs
   {
-    #region Constructor
+    
 
     internal HttpRequestEventArgs(HttpListenerContext context)
     {
@@ -49,9 +49,9 @@ namespace WebSocketSharp.Server {
       Response = context.Response;
     }
 
-    #endregion
+    
 
-    #region Properties
+    
 
     /// <summary>
     /// Gets the HTTP request objects sent from a client.
@@ -69,6 +69,6 @@ namespace WebSocketSharp.Server {
     /// </value>
     public HttpListenerResponse Response { get; private set; }
 
-    #endregion
+    
   }
 }

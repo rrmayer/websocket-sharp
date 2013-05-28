@@ -32,15 +32,15 @@ namespace WebSocketSharp.Net {
 
 	class HttpHeaderInfo {
 
-		#region Constructor
+		
 
 		public HttpHeaderInfo ()
 		{
 		}
 
-		#endregion
+		
 
-		#region Properties
+		
 
 		public bool IsMultiValueInRequest {
 			get {
@@ -70,9 +70,9 @@ namespace WebSocketSharp.Net {
 
 		public HttpHeaderType Type { get; set; }
 
-		#endregion
+		
 
-		#region Methods
+		
 
 		public bool IsMultiValue (bool response)
 		{
@@ -94,6 +94,6 @@ namespace WebSocketSharp.Net {
 			         : IsRequest;
 		}
 
-		#endregion
+		
 	}
 }

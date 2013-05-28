@@ -1,4 +1,4 @@
-#region License
+
 /*
  * CloseEventArgs.cs
  *
@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using System.Text;
@@ -41,15 +41,15 @@ namespace WebSocketSharp {
   /// </remarks>
   public class CloseEventArgs : MessageEventArgs
   {
-    #region Fields
+    
 
     private bool   _clean;
     private ushort _code;
     private string _reason;
 
-    #endregion
+    
 
-    #region Constructors
+    
 
     internal CloseEventArgs(PayloadData data)
       : base(Opcode.CLOSE, data)
@@ -59,9 +59,9 @@ namespace WebSocketSharp {
       _clean  = false;
     }
 
-    #endregion
+    
 
-    #region Properties
+    
 
     /// <summary>
     /// Gets the status code for closure.
@@ -103,9 +103,9 @@ namespace WebSocketSharp {
       }
     }
 
-    #endregion
+    
 
-    #region Private Methods
+    
 
     private ushort getCodeFrom(PayloadData data)
     {
@@ -123,6 +123,6 @@ namespace WebSocketSharp {
       return Encoding.UTF8.GetString(buffer);
     }
 
-    #endregion
+    
   }
 }

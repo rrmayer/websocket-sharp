@@ -46,7 +46,7 @@ namespace WebSocketSharp.Net {
 	/// </remarks>
 	public sealed class HttpListenerResponse : IDisposable
 	{
-		#region Private Fields
+		
 
 		bool                chunked;
 		bool                cl_set;
@@ -65,15 +65,15 @@ namespace WebSocketSharp.Net {
 		string              status_description;
 		Version             version;
 
-		#endregion
+		
 
-		#region Internal Field
+		
 
 		internal bool HeadersSent;
 
-		#endregion
+		
 
-		#region Constructor
+		
 
 		internal HttpListenerResponse (HttpListenerContext context)
 		{
@@ -81,17 +81,17 @@ namespace WebSocketSharp.Net {
 			Init ();
 		}
 
-		#endregion
+		
 
-		#region Internal Property
+		
 
 		internal bool ForceCloseChunked {
 			get { return force_close_chunked; }
 		}
 
-		#endregion
+		
 
-		#region Public Properties
+		
 
 		/// <summary>
 		/// Gets or sets the encoding that can be used with the entity body data included in the response.
@@ -422,9 +422,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion
+		
 
-		#region Private Methods
+		
 
 		bool CanAddOrUpdate (Cookie cookie)
 		{
@@ -470,9 +470,9 @@ namespace WebSocketSharp.Net {
 			version = HttpVersion.Version11;
 		}
 
-		#endregion
+		
 
-		#region Internal Method
+		
 
 		internal void SendHeaders (bool closing, MemoryStream ms)
 		{
@@ -572,9 +572,9 @@ namespace WebSocketSharp.Net {
 			HeadersSent = true;
 		}
 
-		#endregion
+		
 
-		#region Explicit Interface Implementation
+		
 
 		/// <summary>
 		/// Releases all resource used by the <see cref="HttpListenerResponse"/>.
@@ -584,9 +584,9 @@ namespace WebSocketSharp.Net {
 			Close (true); // TODO: Abort or Close?
 		}
 
-		#endregion
+		
 
-		#region Public Methods
+		
 
 		/// <summary>
 		/// Closes the connection to the client without sending a response.
@@ -767,6 +767,6 @@ namespace WebSocketSharp.Net {
 			Cookies.Add (cookie);
 		}
 
-		#endregion
+		
 	}
 }

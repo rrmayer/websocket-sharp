@@ -40,7 +40,7 @@ namespace WebSocketSharp.Net {
 	[Serializable]
 	public class CookieException : FormatException, ISerializable
 	{
-		#region Internal Constructors
+		
 
 		internal CookieException (string message)
 			: base (message)
@@ -52,9 +52,9 @@ namespace WebSocketSharp.Net {
 		{
 		}
 
-		#endregion
+		
 
-		#region Protected Constructor
+		
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CookieException"/> class
@@ -71,9 +71,9 @@ namespace WebSocketSharp.Net {
 		{
 		}
 
-		#endregion
+		
 
-		#region Public Constructor
+		
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CookieException"/> class.
@@ -83,9 +83,9 @@ namespace WebSocketSharp.Net {
 		{
 		}
 
-		#endregion
+		
 
-		#region Explicit Interface Implementation
+		
 
 		/// <summary>
 		/// Populates the specified <see cref="SerializationInfo"/> with the data needed to serialize the <see cref="CookieException"/>.
@@ -102,9 +102,9 @@ namespace WebSocketSharp.Net {
 			base.GetObjectData (serializationInfo, streamingContext);
 		}
 
-		#endregion
+		
 
-		#region Public Method
+		
 
 		/// <summary>
 		/// Populates the specified <see cref="SerializationInfo"/> with the data needed to serialize the <see cref="CookieException"/>.
@@ -121,6 +121,6 @@ namespace WebSocketSharp.Net {
 			base.GetObjectData (serializationInfo, streamingContext);
 		}
 
-		#endregion
+		
 	}
 }

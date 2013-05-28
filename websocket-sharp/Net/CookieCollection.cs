@@ -62,20 +62,20 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#region Private Static Fields
+		
 
 		static CookieCollectionComparer Comparer = new CookieCollectionComparer ();
 
-		#endregion
+		
 
-		#region Private Fields
+		
 
 		List<Cookie> list;
 		object       sync;
 
-		#endregion
+		
 
-		#region Public Constructors
+		
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CookieCollection"/> class.
@@ -90,9 +90,9 @@ namespace WebSocketSharp.Net {
             list = new List<Cookie>(cookies);
         }
 
-		#endregion
+		
 
-		#region Internal Properties
+		
 
 		internal IList<Cookie> List {
 			get { return list; }
@@ -108,9 +108,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion
+		
 
-		#region Public Properties
+		
 
 		/// <summary>
 		/// Gets the number of cookies contained in the <see cref="CookieCollection"/>.
@@ -211,9 +211,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion
+		
 
-		#region Private Methods
+		
 
 		static CookieCollection ParseRequest (string value)
 		{
@@ -409,9 +409,9 @@ namespace WebSocketSharp.Net {
 			return value.SplitHeaderValue (',', ';');
 		}
 
-		#endregion
+		
 
-		#region Internal Methods
+		
 
 		internal static CookieCollection Parse (string value, bool response)
 		{
@@ -447,9 +447,9 @@ namespace WebSocketSharp.Net {
 				list.Sort (Comparer);
 		}
 
-		#endregion
+		
 
-		#region Public Methods
+		
 
 		/// <summary>
 		/// Add the specified <see cref="Cookie"/> to the <see cref="CookieCollection"/>.
@@ -591,6 +591,6 @@ namespace WebSocketSharp.Net {
 			return list.GetEnumerator ();
 		}
 
-		#endregion
+		
 	}
 }

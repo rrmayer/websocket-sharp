@@ -42,7 +42,7 @@ namespace WebSocketSharp.Net {
 
 	sealed class EndPointListener {
 
-		#region Fields
+		
 
 		List<ListenerPrefix>                     all; // host = '+'
 		X509Certificate2                         cert;
@@ -54,9 +54,9 @@ namespace WebSocketSharp.Net {
 		List<ListenerPrefix>                     unhandled; // host = '*'
 		Hashtable                                unregistered;
 
-		#endregion
+		
 
-		#region Constructor
+		
 
 		public EndPointListener (IPAddress addr, int port, bool secure)
 		{
@@ -77,9 +77,9 @@ namespace WebSocketSharp.Net {
 			unregistered = Hashtable.Synchronized (new Hashtable ());
 		}
 
-		#endregion
+		
 
-		#region Private Methods
+		
 
 		void AddSpecial (List<ListenerPrefix> coll, ListenerPrefix prefix)
 		{
@@ -267,18 +267,18 @@ namespace WebSocketSharp.Net {
 			return null;
 		}
 
-		#endregion
+		
 
-		#region Internal Method
+		
 
 		internal void RemoveConnection (HttpConnection conn)
 		{
 			unregistered.Remove (conn);
 		}
 
-		#endregion
+		
 
-		#region Public Methods
+		
 
 		public void AddPrefix (ListenerPrefix prefix, HttpListener listener)
 		{
@@ -397,6 +397,6 @@ namespace WebSocketSharp.Net {
 			context.Listener.UnregisterContext (context);
 		}
 
-		#endregion
+		
 	}
 }

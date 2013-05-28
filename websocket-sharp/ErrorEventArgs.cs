@@ -1,4 +1,4 @@
-#region MIT License
+
 /*
  * ErrorEventArgs.cs
  *
@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 
@@ -39,16 +39,16 @@ namespace WebSocketSharp {
   /// </remarks>
   public class ErrorEventArgs : EventArgs
   {
-    #region Constructor
+    
 
     internal ErrorEventArgs(string message)
     {
       Message = message;
     }
 
-    #endregion
+    
 
-    #region Property
+    
 
     /// <summary>
     /// Gets the error message.
@@ -58,6 +58,6 @@ namespace WebSocketSharp {
     /// </value>
     public string Message { get; private set; }
 
-    #endregion
+    
   }
 }

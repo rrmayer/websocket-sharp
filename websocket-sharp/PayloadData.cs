@@ -1,4 +1,4 @@
-#region License
+
 /*
  * PayloadData.cs
  *
@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using System.Collections;
@@ -38,13 +38,13 @@ namespace WebSocketSharp {
 
   internal class PayloadData : IEnumerable<byte>
   {
-    #region Public Fields
+    
 
     public const ulong MaxLength = long.MaxValue;
 
-    #endregion
+    
 
-    #region Public Constructors
+    
 
     public PayloadData()
       : this(new byte[]{})
@@ -88,9 +88,9 @@ namespace WebSocketSharp {
       IsMasked = masked;
     }
 
-    #endregion
+    
 
-    #region Internal Properties
+    
 
     internal bool ContainsReservedCloseStatusCode {
       get {
@@ -116,17 +116,17 @@ namespace WebSocketSharp {
       }
     }
 
-    #endregion
+    
 
-    #region Public Properties
+    
 
     public byte[] ExtensionData { get; private set; }
 
     public byte[] ApplicationData { get; private set; }
 
-    #endregion
+    
 
-    #region Private Methods
+    
 
     private static void mask(byte[] src, byte[] key)
     {
@@ -134,9 +134,9 @@ namespace WebSocketSharp {
         src[i] = (byte)(src[i] ^ key[i % 4]);
     }
 
-    #endregion
+    
 
-    #region Internal Methods
+    
 
     internal bool Compress(CompressionMethod method)
     {
@@ -175,9 +175,9 @@ namespace WebSocketSharp {
       }
     }
 
-    #endregion
+    
 
-    #region Public Methods
+    
 
     public IEnumerator<byte> GetEnumerator()
     {
@@ -217,15 +217,15 @@ namespace WebSocketSharp {
       return BitConverter.ToString(ToByteArray());
     }
 
-    #endregion
+    
 
-    #region Explicitly Implemented Interface Members
+    
 
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
     }
 
-    #endregion
+    
   }
 }

@@ -1,4 +1,4 @@
-#region MIT License
+
 /*
  * WebSocketServer.cs
  *
@@ -26,7 +26,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using System.Collections.Generic;
@@ -45,13 +45,13 @@ namespace WebSocketSharp.Server
     /// </remarks>
     public sealed class WebSocketServer : WebSocketServerBase
     {
-        #region Field
+        
 
         private ServiceHostManager _svcHosts;
 
-        #endregion
+        
 
-        #region Public Constructors
+        
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WebSocketServer"/> class.
@@ -146,9 +146,9 @@ namespace WebSocketSharp.Server
             init();
         }
 
-        #endregion
+        
 
-        #region Properties
+        
 
         /// <summary>
         /// Gets the collection of paths associated with the every WebSocket services that the server provides.
@@ -187,18 +187,18 @@ namespace WebSocketSharp.Server
             }
         }
 
-        #endregion
+        
 
-        #region Private Method
+        
 
         private void init()
         {
             _svcHosts = new ServiceHostManager();
         }
 
-        #endregion
+        
 
-        #region Protected Method
+        
 
         /// <summary>
         /// Accepts a WebSocket connection request.
@@ -224,9 +224,9 @@ namespace WebSocketSharp.Server
             svcHost.NewWebSocketClient(context);
         }
 
-        #endregion
+        
 
-        #region Public Methods
+        
 
         /// <summary>
         /// Adds the specified type WebSocket service.
@@ -289,6 +289,6 @@ namespace WebSocketSharp.Server
             _svcHosts.CloseAllSessionsForServerShutdown();
         }
 
-        #endregion
+        
     }
 }

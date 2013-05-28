@@ -1,4 +1,4 @@
-#region MIT License
+
 /*
  * WebSocketServiceHost.cs
  *
@@ -26,7 +26,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System.Collections.Generic;
 using WebSocketSharp.Net.WebSockets;
@@ -110,7 +110,7 @@ namespace WebSocketSharp.Server
 
         public IEnumerable<WebSocketContext> CurrentSessions { get { return _sessions.AllSessions; }}
 
-            #region Public Methods
+            
 
         /// <summary>
         /// Broadcasts the specified <see cref="string"/> to all clients.
@@ -149,6 +149,6 @@ namespace WebSocketSharp.Server
             return _sessions.Broadping(message);
         }
 
-        #endregion
+        
     }
 }

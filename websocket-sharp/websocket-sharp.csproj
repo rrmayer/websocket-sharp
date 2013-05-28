@@ -97,7 +97,7 @@
     <Compile Include="ErrorEventArgs.cs" />
     <Compile Include="Net\WebSockets\WebSocket.cs" />
     <Compile Include="Server\WebSocketServer.cs" />
-    <Compile Include="WsStream.cs" />
+    <Compile Include="WebSocketStream.cs" />
     <Compile Include="RequestHandshake.cs" />
     <Compile Include="ResponseHandshake.cs" />
     <Compile Include="Handshake.cs" />
@@ -137,7 +137,7 @@
     <Compile Include="Opcode.cs" />
     <Compile Include="PayloadData.cs" />
     <Compile Include="Rsv.cs" />
-    <Compile Include="WsFrame.cs" />
+    <Compile Include="WebSocketFrame.cs" />
     <Compile Include="Net\WebSockets\HttpListenerWebSocketContext.cs" />
     <Compile Include="Net\WebSockets\TcpListenerWebSocketContext.cs" />
     <Compile Include="Net\WebSockets\WebSocketContext.cs" />

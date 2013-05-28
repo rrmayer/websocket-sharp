@@ -56,14 +56,14 @@ namespace WebSocketSharp.Net {
 	[Serializable]
 	public sealed class Cookie {
 
-		#region Static Private Fields
+		
 
 		static char [] reservedCharsForName = new char [] {' ', '=', ';', ',', '\n', '\r', '\t'};
 		static char [] reservedCharsForValue = new char [] {';', ','};
 
-		#endregion
+		
 
-		#region Private Fields
+		
 
 		string   comment;
 		Uri      commentUri;
@@ -80,9 +80,9 @@ namespace WebSocketSharp.Net {
 		string   val;
 		int      version;
 
-		#endregion
+		
 
-		#region Public Constructors
+		
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Cookie"/> class.
@@ -232,9 +232,9 @@ namespace WebSocketSharp.Net {
 			Domain = domain;
 		}
 
-		#endregion
+		
 
-		#region Internal Properties
+		
 
 		internal bool ExactDomain { get; set; }
 
@@ -258,9 +258,9 @@ namespace WebSocketSharp.Net {
 			get { return ports; }
 		}
 
-		#endregion
+		
 
-		#region Public Properties
+		
 
 		/// <summary>
 		/// Gets or sets the value of the Comment attribute of the cookie.
@@ -506,9 +506,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion
+		
 
-		#region Private Methods
+		
 
 		static bool CanSetName (string name, out string message)
 		{
@@ -629,9 +629,9 @@ namespace WebSocketSharp.Net {
 			return true;
 		}
 
-		#endregion
+		
 
-		#region Internal Methods
+		
 
 		// From client to server
 		internal string ToRequestString (Uri uri)
@@ -674,9 +674,9 @@ namespace WebSocketSharp.Net {
 			         : ToResponseStringVersion1 ();
 		}
 
-		#endregion
+		
 
-		#region Public Methods
+		
 
 		/// <summary>
 		/// Determines whether the specified <see cref="Object"/> is equal to the current <see cref="Cookie"/>.
@@ -732,6 +732,6 @@ namespace WebSocketSharp.Net {
 			return ToRequestString (null);
 		}
 
-		#endregion
+		
 	}
 }

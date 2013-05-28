@@ -35,13 +35,13 @@ namespace WebSocketSharp.Net {
 
 	class ListenerAsyncResult : IAsyncResult
 	{
-		#region Private Static Field
+		
 
 		static WaitCallback InvokeCB = new WaitCallback (InvokeCallback);
 
-		#endregion
+		
 
-		#region Private Fields
+		
 
 		AsyncCallback       cb;
 		bool                completed;
@@ -53,16 +53,16 @@ namespace WebSocketSharp.Net {
 		object              state;
 		bool                synch;
 
-		#endregion
+		
 
-		#region Internal Fields
+		
 
 		internal bool EndCalled;
 		internal bool InGet;
 
-		#endregion
+		
 
-		#region Constructor
+		
 
 		public ListenerAsyncResult (AsyncCallback cb, object state)
 		{
@@ -71,9 +71,9 @@ namespace WebSocketSharp.Net {
 			this.locker = new object();
 		}
 
-		#endregion
+		
 
-		#region Properties
+		
 
 		public object AsyncState {
 			get {
@@ -118,9 +118,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion
+		
 
-		#region Private Method
+		
 
 		static void InvokeCallback (object o)
 		{
@@ -136,9 +136,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion
+		
 
-		#region Internal Methods
+		
 
 		internal void Complete (Exception exc)
 		{
@@ -217,6 +217,6 @@ namespace WebSocketSharp.Net {
 			return context;
 		}
 
-		#endregion
+		
 	}
 }

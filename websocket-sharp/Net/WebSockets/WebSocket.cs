@@ -1,4 +1,4 @@
-#region License
+
 /*
  * WebSocket.cs
  *
@@ -28,7 +28,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using System.Collections;
@@ -38,6 +38,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -54,29 +55,28 @@ namespace WebSocketSharp
     /// </remarks>
     public abstract class WebSocket : IDisposable
     {
-        #region Private Const Fields
+        
 
         private const int FragmentLen = 1016; // Max value is int.MaxValue - 14.
 
-        #endregion
+        
 
-        #region Private Fields
+        
 
         private bool _client;
-        private CompressionMethod _compression;
-        private string _extensions;
+        protected CompressionMethod _compression;
+        protected string _extensions;
         private AutoResetEvent _exitReceiving;
         private Object _forClose;
         private Object _forSend;
-        private string _origin;
+        protected string _origin;
         private bool _perFrameCompress;
         private volatile WebSocketState _state;
         private AutoResetEvent _receivePong;
-        protected WsStream _wsStream;
 
-        #endregion
+        
 
-        #region Private Constructors
+        
 
         protected WebSocket()
         {
@@ -89,14 +89,22 @@ namespace WebSocketSharp
             _state = WebSocketState.CONNECTING;
         }
 
-        #endregion
+        
 
-        #region Public Properties
+        
 
         /// <summary>
         /// Returns the stream established by the web sockets.
         /// </summary>
-        protected Stream UnderlyingStream { get; set; }
+        public Stream UnderlyingStream { get; protected set; }
+
+        /// <summary>
+        /// Returns the underlying stream as a WebSocketStream.
+        /// </summary>
+        internal WebSocketStream WebSocketStream
+        {
+            get { return UnderlyingStream as WebSocketStream; }
+        }
 
         /// <summary>
         /// Called when this WebSocket is closing to free any resources.
@@ -199,7 +207,7 @@ namespace WebSocketSharp
         /// <value>
         /// A <see cref="string"/> that contains the subprotocol if any. The default is <see cref="String.Empty"/>.
         /// </value>
-        public string SubProtocol {get; protected set;}
+        public string SubProtocol { get; protected set; }
 
         /// <summary>
         /// Gets the current state of the WebSocket connection.
@@ -210,9 +218,9 @@ namespace WebSocketSharp
         public WebSocketState State { get; protected set; }
 
 
-        #endregion
+        
 
-        #region Events
+        
 
         /// <summary>
         /// Occurs when the <see cref="WebSocket"/> receives a Close frame or the Close method is called.
@@ -234,9 +242,14 @@ namespace WebSocketSharp
         /// </summary>
         public event EventHandler OnOpen;
 
-        #endregion
+        /// <summary>
+        /// Returns the raw TCP client associated with this WebSocket
+        /// </summary>
+        public TcpClient Client { get; protected set; }
 
-        #region Private Methods
+        
+
+        
 
         protected static string createCompressExtension(CompressionMethod method)
         {
@@ -245,18 +258,18 @@ namespace WebSocketSharp
                    : String.Empty;
         }
 
-        private static WsFrame createControlFrame(Opcode opcode, PayloadData payloadData, bool client)
+        private static WebSocketFrame createControlFrame(Opcode opcode, PayloadData payloadData, bool client)
         {
             var mask = client ? Mask.MASK : Mask.UNMASK;
-            return new WsFrame(opcode, mask, payloadData);
+            return new WebSocketFrame(opcode, mask, payloadData);
         }
 
-        private static WsFrame createDataFrame(
+        private static WebSocketFrame createDataFrame(
           Fin fin, Opcode opcode, PayloadData payloadData, CompressionMethod method, bool compressed, bool client)
         {
             var mask = client ? Mask.MASK : Mask.UNMASK;
             var compress = compressed ? CompressionMethod.NONE : method;
-            var frame = new WsFrame(fin, opcode, mask, payloadData, compress);
+            var frame = new WebSocketFrame(fin, opcode, mask, payloadData, compress);
             if (compressed)
                 frame.PerMessageCompressed = true;
 
@@ -356,7 +369,7 @@ namespace WebSocketSharp
             pong(payloadData);
         }
 
-        private bool processAbnormal(WsFrame frame)
+        private bool processAbnormal(WebSocketFrame frame)
         {
             if (!frame.IsNull())
                 return false;
@@ -370,7 +383,7 @@ namespace WebSocketSharp
             return true;
         }
 
-        private bool processClose(WsFrame frame)
+        private bool processClose(WebSocketFrame frame)
         {
             if (!frame.IsClose)
                 return false;
@@ -383,7 +396,7 @@ namespace WebSocketSharp
             return true;
         }
 
-        private bool processData(WsFrame frame)
+        private bool processData(WebSocketFrame frame)
         {
             if (!frame.IsData)
                 return false;
@@ -398,7 +411,7 @@ namespace WebSocketSharp
             return true;
         }
 
-        private bool processFragmented(WsFrame frame)
+        private bool processFragmented(WebSocketFrame frame)
         {
             // Not first fragment
             if (frame.IsContinuation)
@@ -417,14 +430,14 @@ namespace WebSocketSharp
             return true;
         }
 
-        private void processFragments(WsFrame first)
+        private void processFragments(WebSocketFrame first)
         {
             bool compressed = first.IsCompressed;
             if (compressed && _perFrameCompress)
                 first.Decompress(_compression);
 
             var buffer = new List<byte>(first.PayloadData.ToByteArray());
-            Func<WsFrame, bool> processContinuation = contFrame =>
+            Func<WebSocketFrame, bool> processContinuation = contFrame =>
             {
                 if (!contFrame.IsContinuation)
                     return false;
@@ -438,7 +451,7 @@ namespace WebSocketSharp
 
             while (true)
             {
-                var frame = _wsStream.ReadFrame();
+                var frame = WebSocketStream.ReadFrame();
                 if (processAbnormal(frame))
                     return;
 
@@ -479,7 +492,7 @@ namespace WebSocketSharp
             onMessage(new MessageEventArgs(first.Opcode, new PayloadData(data)));
         }
 
-        private void processFrame(WsFrame frame)
+        private void processFrame(WebSocketFrame frame)
         {
             bool processed = processAbnormal(frame) ||
                              processFragmented(frame) ||
@@ -500,7 +513,7 @@ namespace WebSocketSharp
             Close(CloseStatusCode.INCORRECT_DATA);
         }
 
-        private bool processPing(WsFrame frame)
+        private bool processPing(WebSocketFrame frame)
         {
             if (!frame.IsPing)
                 return false;
@@ -513,7 +526,7 @@ namespace WebSocketSharp
             return true;
         }
 
-        private bool processPong(WsFrame frame)
+        private bool processPong(WebSocketFrame frame)
         {
             if (!frame.IsPong)
                 return false;
@@ -526,7 +539,7 @@ namespace WebSocketSharp
             return true;
         }
 
-        private bool send(WsFrame frame)
+        private bool send(WebSocketFrame frame)
         {
             if (!isOpened(false))
             {
@@ -536,10 +549,10 @@ namespace WebSocketSharp
 
             try
             {
-                if (_wsStream.IsNull())
+                if (WebSocketStream.IsNull())
                     return false;
 
-                _wsStream.Write(frame);
+                WebSocketStream.Write(frame);
                 return true;
             }
             catch (Exception ex)
@@ -674,14 +687,14 @@ namespace WebSocketSharp
             _exitReceiving = new AutoResetEvent(false);
             _receivePong = new AutoResetEvent(false);
 
-            Action<WsFrame> completed = null;
+            Action<WebSocketFrame> completed = null;
             completed = (frame) =>
             {
                 try
                 {
                     processFrame(frame);
                     if (_state == WebSocketState.OPEN)
-                        _wsStream.ReadFrameAsync(completed);
+                        WebSocketStream.ReadFrameAsync(completed);
                     else
                         _exitReceiving.Set();
                 }
@@ -695,7 +708,7 @@ namespace WebSocketSharp
                 }
             };
 
-            _wsStream.ReadFrameAsync(completed);
+            WebSocketStream.ReadFrameAsync(completed);
         }
 
         private void close(ushort code, string reason)
@@ -710,9 +723,9 @@ namespace WebSocketSharp
             close(new PayloadData(data));
         }
 
-        #endregion
+        
 
-        #region Public Methods
+        
 
         /// <summary>
         /// Closes the WebSocket connection and releases all associated resources.
@@ -966,7 +979,7 @@ namespace WebSocketSharp
             sendAsync(Opcode.BINARY, file.OpenRead(), completed);
         }
 
-        #endregion
+        
 
         //private bool isValidHostHeader()
         //{

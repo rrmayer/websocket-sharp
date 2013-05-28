@@ -34,15 +34,15 @@ namespace WebSocketSharp.Net {
 
 	class HttpStreamAsyncResult : IAsyncResult {
 
-		#region Private Fields
+		
 
 		bool             completed;
 		ManualResetEvent handle;
 		object           locker = new object ();
 
-		#endregion
+		
 
-		#region Internal Fields
+		
 
 		internal AsyncCallback Callback;
 		internal int           Count;
@@ -52,9 +52,9 @@ namespace WebSocketSharp.Net {
 		internal object        State;
 		internal int           SyncRead;
 
-		#endregion
+		
 
-		#region Properties
+		
 
 		public object AsyncState {
 			get { return State; }
@@ -83,9 +83,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion
+		
 
-		#region Public Methods
+		
 
 		public void Complete ()
 		{
@@ -108,6 +108,6 @@ namespace WebSocketSharp.Net {
 			Complete ();
 		}
 
-		#endregion
+		
 	}
 }

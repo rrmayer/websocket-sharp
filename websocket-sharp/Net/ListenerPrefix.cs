@@ -35,7 +35,7 @@ namespace WebSocketSharp.Net {
 
 	sealed class ListenerPrefix {
 
-		#region Private Fields
+		
 
 		IPAddress [] addresses;
 		string       host;
@@ -44,15 +44,15 @@ namespace WebSocketSharp.Net {
 		ushort       port;
 		bool         secure;
 
-		#endregion
+		
 
-		#region Public Field
+		
 
 		public HttpListener Listener;
 
-		#endregion
+		
 
-		#region Constructor
+		
 
 		// Must be called after calling ListenerPrefix.CheckUri.
 		public ListenerPrefix (string prefix)
@@ -61,9 +61,9 @@ namespace WebSocketSharp.Net {
 			Parse (prefix);
 		}
 
-		#endregion
+		
 
-		#region Properties
+		
 
 		public IPAddress [] Addresses {
 			get { return addresses; }
@@ -86,9 +86,9 @@ namespace WebSocketSharp.Net {
 			get { return secure; }
 		}
 
-		#endregion
+		
 
-		#region Private Method
+		
 
 		void Parse (string uri)
 		{
@@ -116,9 +116,9 @@ namespace WebSocketSharp.Net {
 				path = path.Substring (0, path.Length - 1);
 		}
 
-		#endregion
+		
 
-		#region public Methods
+		
 
 		public static void CheckUri (string uri)
 		{
@@ -183,6 +183,6 @@ namespace WebSocketSharp.Net {
 			return original;
 		}
 
-		#endregion
+		
 	}
 }

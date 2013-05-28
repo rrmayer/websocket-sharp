@@ -1,4 +1,4 @@
-#region MIT License
+
 /*
  * WebSocketServerBase.cs
  *
@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using System.Diagnostics;
@@ -45,7 +45,7 @@ namespace WebSocketSharp.Server
     public abstract class WebSocketServerBase
     {
 
-        #region Fields
+        
 
         private Thread _receiveRequestThread;
         private IPAddress _address;
@@ -55,9 +55,9 @@ namespace WebSocketSharp.Server
         private TcpListener _tcpListener;
         private Uri _uri;
 
-        #endregion
+        
 
-        #region Constructors
+        
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WebSocketServerBase"/> class.
@@ -153,9 +153,9 @@ namespace WebSocketSharp.Server
             init();
         }
 
-        #endregion
+        
 
-        #region Protected Property
+        
 
         /// <summary>
         /// Gets or sets the WebSocket URL on which to listen for incoming connection attempts.
@@ -176,9 +176,9 @@ namespace WebSocketSharp.Server
             }
         }
 
-        #endregion
+        
 
-        #region Public Properties
+        
 
         /// <summary>
         /// Gets the local IP address on which to listen for incoming connection attempts.
@@ -236,18 +236,18 @@ namespace WebSocketSharp.Server
             }
         }
 
-        #endregion
+        
 
-        #region Event
+        
 
         /// <summary>
         /// Occurs when the server gets an error.
         /// </summary>
         public event EventHandler<ErrorEventArgs> OnError;
 
-        #endregion
+        
 
-        #region Private Methods
+        
 
         private void acceptWebSocketAsync(TcpListenerWebSocketContext context)
         {
@@ -343,9 +343,9 @@ namespace WebSocketSharp.Server
             return true;
         }
 
-        #endregion
+        
 
-        #region Protected Methods
+        
 
         /// <summary>
         /// Accepts a WebSocket connection request.
@@ -366,9 +366,9 @@ namespace WebSocketSharp.Server
             onError(message);
         }
 
-        #endregion
+        
 
-        #region Public Methods
+        
 
         /// <summary>
         /// Starts to receive the WebSocket connection requests.
@@ -394,6 +394,6 @@ namespace WebSocketSharp.Server
             _receiveRequestThread.Join(5 * 1000);
         }
 
-        #endregion
+        
     }
 }

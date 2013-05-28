@@ -35,7 +35,7 @@ namespace WebSocketSharp.Net {
 
 	class RequestStream : Stream {
 
-		#region Fields
+		
 
 		byte [] buffer;
 		bool    disposed;
@@ -44,9 +44,9 @@ namespace WebSocketSharp.Net {
 		long    remaining_body;
 		Stream  stream;
 
-		#endregion
+		
 
-		#region Constructors
+		
 
 		internal RequestStream (Stream stream, byte [] buffer, int offset, int length)
 			: this (stream, buffer, offset, length, -1)
@@ -62,9 +62,9 @@ namespace WebSocketSharp.Net {
 			this.remaining_body = contentlength;
 		}
 
-		#endregion
+		
 
-		#region Properties
+		
 
 		public override bool CanRead {
 			get { return true; }
@@ -87,9 +87,9 @@ namespace WebSocketSharp.Net {
 			set { throw new NotSupportedException (); }
 		}
 
-		#endregion
+		
 
-		#region Private Method
+		
 
 		// Returns 0 if we can keep reading from the base stream,
 		// > 0 if we read something from the buffer.
@@ -138,9 +138,9 @@ namespace WebSocketSharp.Net {
 			return size;
 		}
 
-		#endregion
+		
 
-		#region Public Methods
+		
 
 		public override IAsyncResult BeginRead (
 			byte [] buffer, int offset, int count, AsyncCallback cback, object state)
@@ -248,6 +248,6 @@ namespace WebSocketSharp.Net {
 			throw new NotSupportedException ();
 		}
 
-		#endregion
+		
 	}
 }

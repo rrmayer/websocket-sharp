@@ -65,7 +65,7 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#region Private Fields
+		
 
 		int           chunkRead;
 		List<Chunk>   chunks;
@@ -76,15 +76,15 @@ namespace WebSocketSharp.Net {
 		State         state;
 		int           trailerState;
 
-		#endregion
+		
 
-		#region Internal Fields
+		
 
 		internal WebHeaderCollection headers;
 
-		#endregion
+		
 
-		#region Constructors
+		
 
 		public ChunkStream (byte [] buffer, int offset, int size, WebHeaderCollection headers)
 			: this (headers)
@@ -100,9 +100,9 @@ namespace WebSocketSharp.Net {
 			chunkSize = -1;
 		}
 
-		#endregion
+		
 
-		#region Properties
+		
 
 		public int ChunkLeft {
 			get { return chunkSize - chunkRead; }
@@ -112,9 +112,9 @@ namespace WebSocketSharp.Net {
 			get { return (chunkRead != chunkSize || chunkSize != 0 || state != State.None); }
 		}
 
-		#endregion
+		
 
-		#region Private Methods
+		
 
 		State GetChunkSize (byte [] buffer, ref int offset, int size)
 		{
@@ -336,9 +336,9 @@ namespace WebSocketSharp.Net {
 			throw we;
 		}
 
-		#endregion
+		
 
-		#region Public Methods
+		
 
 		public int Read (byte [] buffer, int offset, int size)
 		{
@@ -365,6 +365,6 @@ namespace WebSocketSharp.Net {
 			read = Read (buffer, offset, size);
 		}
 
-		#endregion
+		
 	}
 }

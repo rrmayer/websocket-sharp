@@ -10,8 +10,7 @@ namespace WebSocketSharp.Net.WebSockets
     {
         private string _base64Key;
         private const string Guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-        private const string Version = "13";
-
+       
         public ClientWebSocketOptions Options { get; set; }
 
         /// <summary>
@@ -65,7 +64,7 @@ namespace WebSocketSharp.Net.WebSockets
             var host = uri.DnsSafeHost;
             var port = uri.Port;
             var client = new TcpClient(host, port);
-            _wsStream = WsStream.CreateClientStream(client, host, IsSecure);
+            WebSocketStream = WebSocketStream.CreateClientStream(client, host, IsSecure);
 
             try
             {
@@ -78,25 +77,6 @@ namespace WebSocketSharp.Net.WebSockets
                 onError(msg);
                 Close(CloseStatusCode.ABNORMAL, msg);
             }
-        }
-
-        private static string createBase64Key()
-        {
-            var src = new byte[16];
-            var rand = new Random();
-            rand.NextBytes(src);
-
-            return Convert.ToBase64String(src);
-        }
-
-        private string createResponseKey()
-        {
-            SHA1 sha1 = new SHA1CryptoServiceProvider();
-            var sb = new StringBuilder(_base64Key);
-            sb.Append(Guid);
-            var src = sha1.ComputeHash(Encoding.UTF8.GetBytes(sb.ToString()));
-
-            return Convert.ToBase64String(src);
         }
 
         private static bool isCompressExtension(string value, CompressionMethod method)
@@ -132,16 +112,12 @@ namespace WebSocketSharp.Net.WebSockets
             if (!_origin.IsEmpty())
                 req.AddHeader("Origin", _origin);
 
-            req.AddHeader("Sec-WebSocket-Key", _base64Key);
-
             if (!SubProtocol.IsNullOrEmpty())
                 req.AddHeader("Sec-WebSocket-Protocol", SubProtocol);
 
             var extensions = createRequestExtensions();
             if (!extensions.IsEmpty())
                 req.AddHeader("Sec-WebSocket-Extensions", extensions);
-
-            req.AddHeader("Sec-WebSocket-Version", Version);
 
             if (Options.Cookies.Count > 0)
                 req.SetCookies(new CookieCollection(Options.Cookies.GetCookies(_uri).OfType<Cookie>()));
@@ -152,7 +128,6 @@ namespace WebSocketSharp.Net.WebSockets
         // As client
         private bool doHandshake()
         {
-            init();
             sendRequestHandshake();
             return processResponseHandshake();
         }
@@ -160,7 +135,7 @@ namespace WebSocketSharp.Net.WebSockets
         // As client
         private ResponseHandshake receiveResponseHandshake()
         {
-            var res = ResponseHandshake.Parse(readHandshake());
+            var res = ResponseHandshake.Parse(UnderlyingStream. readHandshake());
 #if DEBUG
             Console.WriteLine("WS: Info@receiveResponseHandshake: Response handshake from server:\n");
             Console.WriteLine(res.ToString());
@@ -175,26 +150,15 @@ namespace WebSocketSharp.Net.WebSockets
             Console.WriteLine("WS: Info@send: Request handshake to server:\n");
             Console.WriteLine(request.ToString());
 #endif
-            _wsStream.Write(request);
-        }
-
-        // As client
-        private void init()
-        {
-            _base64Key = createBase64Key();
-        }
-
-        // As client
-        private bool isValidResponseHandshake(ResponseHandshake response)
-        {
-            return response.IsWebSocketResponse &&
-                (response.HeaderExists("Sec-WebSocket-Accept", createResponseKey()) &&
-                (!response.HeaderExists("Sec-WebSocket-Version") || response.HeaderExists("Sec-WebSocket-Version", Version)));
+            WebSocketStream.Write(request);
         }
 
         // As client
         private void processResponseCookies(CookieCollection cookies)
         {
+            if (cookies == null)
+                throw new ArgumentNullException("cookies");
+            
             foreach (Cookie c in cookies)
                 Options.Cookies.Add(c);
         }
@@ -257,10 +221,10 @@ namespace WebSocketSharp.Net.WebSockets
         // As client
         protected override void OnClosing()
         {
-            if (!_wsStream.IsNull())
+            if (!WebSocketStream.IsNull())
             {
-                _wsStream.Dispose();
-                _wsStream = null;
+                WebSocketStream.Dispose();
+                WebSocketStream = null;
             }
 
             if (UnderlyingStream.IsNull())

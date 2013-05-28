@@ -1,4 +1,4 @@
-#region MIT License
+
 /*
  * WebSocketServiceManager.cs
  *
@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using System.Collections.Concurrent;
@@ -43,7 +43,7 @@ namespace WebSocketSharp.Server
     public class WebSocketSessionManager
     {
 
-        #region Fields
+        
 
         private readonly object _sweepLock;
         private volatile bool _isStopped;
@@ -52,9 +52,9 @@ namespace WebSocketSharp.Server
         private readonly ConcurrentDictionary<string, WebSocketContext> _contexts;
         private Timer _sweepTimer;
 
-        #endregion
+        
 
-        #region Constructor
+        
 
         internal WebSocketSessionManager()
         {
@@ -68,9 +68,9 @@ namespace WebSocketSharp.Server
             startSweepTimer();
         }
 
-        #endregion
+        
 
-        #region Properties
+        
 
         /// <summary>
         /// Gets the collection of IDs of active <see cref="WebSocketService"/> objects
@@ -167,9 +167,9 @@ namespace WebSocketSharp.Server
             }
         }
 
-        #endregion
+        
 
-        #region Private Methods
+        
 
         private void broadcast(byte[] data)
         {
@@ -238,9 +238,9 @@ namespace WebSocketSharp.Server
                 _sweepTimer.Stop();
         }
 
-        #endregion
+        
 
-        #region Internal Methods
+        
 
         internal bool Add(WebSocketContext context)
         {
@@ -255,9 +255,9 @@ namespace WebSocketSharp.Server
             return _contexts.TryRemove(id, out context);
         }
 
-        #endregion
+        
 
-        #region Public Methods
+        
 
         /// <summary>
         /// Closes all sessions currently contained by this <see cref="WebSocketSesisonManager"/>
@@ -363,6 +363,6 @@ namespace WebSocketSharp.Server
             return _contexts.TryGetValue(id, out context);
         }
 
-        #endregion
+        
     }
 }

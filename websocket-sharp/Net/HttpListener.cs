@@ -41,7 +41,7 @@ namespace WebSocketSharp.Net {
 	/// </summary>
 	public sealed class HttpListener : IDisposable {
 
-		#region Fields
+		
 
 		AuthenticationSchemes                                auth_schemes;
 		AuthenticationSchemeSelector                         auth_selector; 
@@ -56,9 +56,9 @@ namespace WebSocketSharp.Net {
 		bool                                                 unsafe_ntlm_auth;
 		List<ListenerAsyncResult>                            wait_queue;
 
-		#endregion
+		
 
-		#region Constructor
+		
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="HttpListener"/> class.
@@ -73,9 +73,9 @@ namespace WebSocketSharp.Net {
 			auth_schemes = AuthenticationSchemes.Anonymous;
 		}
 
-		#endregion
+		
 
-		#region Properties
+		
 
 		/// <summary>
 		/// Gets or sets the scheme used to authenticate the clients.
@@ -173,9 +173,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion
+		
 
-		#region Private Methods
+		
 
 		void Cleanup (bool force)
 		{
@@ -269,9 +269,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion
+		
 
-		#region Internal Methods
+		
 
 		internal void AddConnection (HttpConnection cnc)
 		{
@@ -329,9 +329,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion
+		
 
-		#region Explicit Interface Implementation
+		
 
 		/// <summary>
 		/// Releases all resource used by the <see cref="HttpListener"/>.
@@ -345,9 +345,9 @@ namespace WebSocketSharp.Net {
 			disposed = true;
 		}
 
-		#endregion
+		
 
-		#region Public Methods
+		
 
 		/// <summary>
 		/// Shuts down the <see cref="HttpListener"/> immediately.
@@ -517,6 +517,6 @@ namespace WebSocketSharp.Net {
 			SendServiceUnavailable ();
 		}
 
-		#endregion
+		
 	}
 }

@@ -39,23 +39,23 @@ namespace WebSocketSharp.Net {
 	/// </summary>
 	public class HttpListenerPrefixCollection : ICollection<string>, IEnumerable<string>, IEnumerable
 	{
-		#region Fields
+		
 
 		HttpListener listener;
 		List<string> prefixes;
 
-		#endregion
+		
 
-		#region Private Constructor
+		
 
 		private HttpListenerPrefixCollection ()
 		{
 			prefixes = new List<string> ();
 		}
 
-		#endregion
+		
 
-		#region Internal Constructor
+		
 
 		internal HttpListenerPrefixCollection (HttpListener listener)
 			: this ()
@@ -63,9 +63,9 @@ namespace WebSocketSharp.Net {
 			this.listener = listener;
 		}
 
-		#endregion
+		
 
-		#region Properties
+		
 
 		/// <summary>
 		/// Gets the number of prefixes contained in the <see cref="HttpListenerPrefixCollection"/>.
@@ -97,9 +97,9 @@ namespace WebSocketSharp.Net {
 			get { return false; }
 		}
 
-		#endregion
+		
 
-		#region Explicit Interface Implementation
+		
 
 		/// <summary>
 		/// Gets an object that can be used to iterate through the <see cref="HttpListenerPrefixCollection"/>.
@@ -113,9 +113,9 @@ namespace WebSocketSharp.Net {
 			return prefixes.GetEnumerator ();
 		}
 
-		#endregion
+		
 
-		#region Public Methods
+		
 
 		/// <summary>
 		/// Adds the specified <paramref name="uriPrefix"/> to the <see cref="HttpListenerPrefixCollection"/>.
@@ -258,6 +258,6 @@ namespace WebSocketSharp.Net {
 			return result;
 		}
 
-		#endregion
+		
 	}
 }

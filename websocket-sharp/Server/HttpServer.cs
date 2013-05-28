@@ -1,4 +1,4 @@
-#region MIT License
+
 /*
  * HttpServer.cs
  *
@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using System.Collections.Generic;
@@ -60,7 +60,7 @@ namespace WebSocketSharp.Server
     public class HttpServer
     {
 
-        #region Fields
+        
 
         private bool _isWindows;
         private HttpListener _listener;
@@ -69,9 +69,9 @@ namespace WebSocketSharp.Server
         private string _rootPath;
         private ServiceHostManager _svcHosts;
 
-        #endregion
+        
 
-        #region Constructors
+        
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpServer"/> class that listens for incoming requests
@@ -95,9 +95,9 @@ namespace WebSocketSharp.Server
             init();
         }
 
-        #endregion
+        
 
-        #region Properties
+        
 
         /// <summary>
         /// Gets the port on which to listen for incoming requests.
@@ -144,9 +144,9 @@ namespace WebSocketSharp.Server
             }
         }
 
-        #endregion
+        
 
-        #region Events
+        
 
         /// <summary>
         /// Occurs when the server receives an HTTP CONNECT request.
@@ -198,9 +198,9 @@ namespace WebSocketSharp.Server
         /// </summary>
         public event EventHandler<HttpRequestEventArgs> OnTrace;
 
-        #endregion
+        
 
-        #region Private Methods
+        
 
         private void configureFromConfigFile()
         {
@@ -373,9 +373,9 @@ namespace WebSocketSharp.Server
             return true;
         }
 
-        #endregion
+        
 
-        #region Public Methods
+        
 
         /// <summary>
         /// Adds the specified type WebSocket service.
@@ -439,6 +439,6 @@ namespace WebSocketSharp.Server
             _svcHosts.CloseAllSessionsForServerShutdown();
         }
 
-        #endregion
+        
     }
 }

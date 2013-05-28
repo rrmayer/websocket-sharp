@@ -1,4 +1,4 @@
-#region License
+
 /*
  * MessageEventArgs.cs
  *
@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using System.Text;
@@ -41,14 +41,14 @@ namespace WebSocketSharp {
   /// </remarks>
   public class MessageEventArgs : EventArgs
   {
-    #region Fields
+    
 
     private PayloadData _data;
     private Opcode      _type;
 
-    #endregion
+    
 
-    #region Constructors
+    
 
     internal MessageEventArgs(Opcode type, PayloadData data)
     {
@@ -56,9 +56,9 @@ namespace WebSocketSharp {
       _data = data;
     }
 
-    #endregion
+    
 
-    #region Properties
+    
 
     /// <summary>
     /// Gets the received data as a <see cref="string"/>.
@@ -100,6 +100,6 @@ namespace WebSocketSharp {
       }
     }
 
-    #endregion
+    
   }
 }

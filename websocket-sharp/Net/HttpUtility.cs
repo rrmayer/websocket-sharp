@@ -65,23 +65,23 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#region Fields
+		
 
 		static Hashtable entities;
 		static char []   hexChars = "0123456789abcdef".ToCharArray ();
 		static object    lock_ = new object ();
 
-		#endregion // Fields
+		 // Fields
 
-		#region Constructor
+		
 
 		public HttpUtility () 
 		{
 		}
 
-		#endregion // Constructor
+		 // Constructor
 
-		#region Property
+		
 
 		static Hashtable Entities {
 			get {
@@ -94,9 +94,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion // Property
+		 // Property
 
-		#region Private Methods
+		
 
 		static int GetChar (byte [] bytes, int offset, int length)
 		{
@@ -500,9 +500,9 @@ namespace WebSocketSharp.Net {
 				buf.Add ((byte)ch);
 		}
 
-		#endregion // Private Methods
+		 // Private Methods
 
-		#region Internal Method
+		
 
 		internal static void ParseQueryString (string query, Encoding encoding, NameValueCollection result)
 		{
@@ -552,9 +552,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion // Internal Methods
+		 // Internal Methods
 
-		#region Public Methods
+		
 
 		public static string HtmlAttributeEncode (string s) 
 		{
@@ -1138,6 +1138,6 @@ namespace WebSocketSharp.Net {
 			return Encoding.ASCII.GetString (result.ToArray ());
 		}
 
-		#endregion // Public Methods
+		 // Public Methods
 	}
 }

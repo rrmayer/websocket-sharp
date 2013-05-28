@@ -1,4 +1,4 @@
-#region MIT License
+
 /*
  * HttpListenerWebSocketContext.cs
  *
@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
+
 
 using System;
 using System.Collections.Generic;
@@ -40,36 +40,36 @@ namespace WebSocketSharp.Net.WebSockets {
   /// </remarks>
   public class HttpListenerWebSocketContext : WebSocketContext
   {
-    #region Fields
+    
 
     private HttpListenerContext _context;
     private WebSocket           _websocket;
-    private WsStream            _wsStream;
+    private WebSocketStream            _wsStream;
 
-    #endregion
+    
 
-    #region Constructor
+    
 
     internal HttpListenerWebSocketContext(HttpListenerContext context)
     {
       _context   = context;
-      _wsStream  = WsStream.CreateServerStream(context);
+      _wsStream  = WebSocketStream.CreateServerStream(context);
       _websocket = new WebSocket(this);
     }
 
-    #endregion
+    
 
-    #region Internal Property
+    
 
-    internal WsStream Stream {
+    internal WebSocketStream Stream {
       get {
         return _wsStream;
       }
     }
 
-    #endregion
+    
 
-    #region Public Properties
+    
 
     /// <summary>
     /// Gets the cookies used in the WebSocket opening handshake.
@@ -108,24 +108,12 @@ namespace WebSocketSharp.Net.WebSockets {
     }
 
     /// <summary>
-    /// Gets a value indicating whether the client connected from the local computer.
-    /// </summary>
-    /// <value>
-    /// <c>true</c> if the client connected from the local computer; otherwise, <c>false</c>.
-    /// </value>
-    public override bool IsLocal {
-      get {
-        return _context.Request.IsLocal;
-      }
-    }
-
-    /// <summary>
     /// Gets a value indicating whether the WebSocket connection is secured.
     /// </summary>
     /// <value>
     /// <c>true</c> if the WebSocket connection is secured; otherwise, <c>false</c>.
     /// </value>
-    public override bool IsSecureConnection {
+    public override bool IsSecure {
       get {
         return _context.Request.IsSecureConnection;
       }
@@ -139,11 +127,7 @@ namespace WebSocketSharp.Net.WebSockets {
     /// </value>
     public override bool IsValid {
       get {
-        return !_context.Request.IsWebSocketRequest
-               ? false
-               : SecWebSocketKey.IsNullOrEmpty()
-                 ? false
-                 : !SecWebSocketVersion.IsNullOrEmpty();
+        return _context.Request.IsWebSocketRequest && (!SecWebSocketKey.IsNullOrEmpty() && !SecWebSocketVersion.IsNullOrEmpty());
       }
     }
 
@@ -276,27 +260,15 @@ namespace WebSocketSharp.Net.WebSockets {
       }
     }
 
-    /// <summary>
-    /// Gets the WebSocket instance used for two-way communication between client and server.
-    /// </summary>
-    /// <value>
-    /// A <see cref="WebSocketSharp.WebSocket"/>.
-    /// </value>
-    public override WebSocket WebSocket {
-      get {
-        return _websocket;
-      }
-    }
+    
 
-    #endregion
-
-    #region Internal Method
+    
 
     internal void Close()
     {
       _context.Connection.Close(true);
     }
 
-    #endregion
+    
   }
 }

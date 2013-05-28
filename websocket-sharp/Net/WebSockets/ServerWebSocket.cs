@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
@@ -9,12 +10,13 @@ namespace WebSocketSharp.Net.WebSockets
 {
     public sealed class ServerWebSocket : WebSocket
     {
-        public WebSocketContext Context {get; private set;}
+        public WebSocketContext Context { get; private set; }
 
-        public ServerWebSocket(WebSocketContext context)
+        public ServerWebSocket(TcpClient client, bool useTls)
         {
-            Context = context;
-            init();
+            WebSocketStream = WebSocketStream.CreateServerStream(client, useTls);
+            var request = RequestHandshake.Parse(WebSocketStream.ReadHandshake());
+            Context = new TcpListenerWebSocketContext(request, client, useTls);
         }
 
         // As server
@@ -41,16 +43,6 @@ namespace WebSocketSharp.Net.WebSockets
         }
 
         // As server
-        private void init()
-        {
-            _wsStream = Context.Stream;
-            _closeContext = Context.Close;
-            _uri = context.Path.ToUri();
-            _secure = context.IsSecureConnection;
-            _client = false;
-        }
-
-        // As server
 
         private static bool isPerFrameCompressExtension(string value)
         {
@@ -66,8 +58,8 @@ namespace WebSocketSharp.Net.WebSockets
         // As server
         private bool isValidHostHeader1808838690()
         {
-            var authority = _context.Headers["Host"];
-            if (authority.IsNullOrEmpty() || !_uri.IsAbsoluteUri)
+            var authority = Context.Headers["Host"];
+            if (authority.IsNullOrEmpty() || !Context.RequestUri.IsAbsoluteUri)
                 return true;
 
             var i = authority.IndexOf(':');
@@ -76,11 +68,9 @@ namespace WebSocketSharp.Net.WebSockets
                      : authority;
             var type = Uri.CheckHostName(host);
 
-            return type != UriHostNameType.Dns
-                   ? true
-                   : Uri.CheckHostName(_uri.DnsSafeHost) != UriHostNameType.Dns
-                     ? true
-                     : host == _uri.DnsSafeHost;
+            var rtn = type != UriHostNameType.Dns || (Uri.CheckHostName(Context.RequestUri.DnsSafeHost) != UriHostNameType.Dns || host == Context.RequestUri.DnsSafeHost);
+
+            return rtn;
         }
 
         // As server
@@ -143,7 +133,7 @@ namespace WebSocketSharp.Net.WebSockets
             Console.WriteLine("WS: Info@processRequestHandshake: Request handshake from client:\n");
             Console.WriteLine(req.ToString());
 #endif
-            if (!isValidRequesHandshake())
+            if (!isValidRequestHandshake())
             {
                 onError("Invalid WebSocket connection request.");
                 close(HttpStatusCode.BadRequest);
@@ -240,15 +230,6 @@ namespace WebSocketSharp.Net.WebSockets
 #endif
         }
 
-        private void close(HttpStatusCode code)
-        {
-            if (State != WebSocketState.CONNECTING || _client)
-                return;
-
-            sendResponseHandshake(code);
-            closeResources();
-        }
-
         private void close(ushort code, string reason)
         {
             using (var buffer = new MemoryStream())
@@ -290,7 +271,7 @@ namespace WebSocketSharp.Net.WebSockets
             if (!_context.IsNull() && !_closeContext.IsNull())
             {
                 _closeContext();
-                _wsStream = null;
+                WebSocketStream = null;
                 _context = null;
             }
         }

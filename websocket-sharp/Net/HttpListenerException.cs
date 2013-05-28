@@ -39,7 +39,7 @@ namespace WebSocketSharp.Net {
 	[Serializable]
 	public class HttpListenerException : Win32Exception {
 
-		#region Public Constructors
+		
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="HttpListenerException"/> class.
@@ -73,9 +73,9 @@ namespace WebSocketSharp.Net {
 		{
 		}
 
-		#endregion
+		
 
-		#region Protected Constructor
+		
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="HttpListenerException"/> class
@@ -92,9 +92,9 @@ namespace WebSocketSharp.Net {
 		{
 		}
 
-		#endregion
+		
 
-		#region Property
+		
 
 		/// <summary>
 		/// Gets a value that represents the error that occurred.
@@ -106,6 +106,6 @@ namespace WebSocketSharp.Net {
 			get { return base.ErrorCode; }
 		}
 
-		#endregion
+		
 	}
 }

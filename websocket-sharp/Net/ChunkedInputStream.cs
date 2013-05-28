@@ -54,16 +54,16 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#region Fields
+		
 
 		HttpListenerContext context;
 		ChunkStream         decoder;
 		bool                disposed;
 		bool                no_more_data;
 
-		#endregion
+		
 
-		#region Constructor
+		
 
 		public ChunkedInputStream (
 			HttpListenerContext context, Stream stream, byte [] buffer, int offset, int length)
@@ -74,18 +74,18 @@ namespace WebSocketSharp.Net {
 			decoder = new ChunkStream (coll);
 		}
 
-		#endregion
+		
 
-		#region Property
+		
 
 		public ChunkStream Decoder {
 			get { return decoder; }
 			set { decoder = value; }
 		}
 
-		#endregion
+		
 
-		#region Private Method
+		
 
 		void OnRead (IAsyncResult base_ares)
 		{
@@ -113,9 +113,9 @@ namespace WebSocketSharp.Net {
 			}
 		}
 
-		#endregion
+		
 
-		#region Public Methods
+		
 
 		public override IAsyncResult BeginRead (
 			byte [] buffer, int offset, int count, AsyncCallback cback, object state)
@@ -199,6 +199,6 @@ namespace WebSocketSharp.Net {
 			return EndRead (ares);
 		}
 
-		#endregion
+		
 	}
 }
