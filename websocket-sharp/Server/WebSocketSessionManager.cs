@@ -47,7 +47,7 @@ namespace WebSocketSharp.Server
         private readonly object _syncRoot;
         private readonly ConcurrentDictionary<Guid, ServerSession> _sessions;
         private Timer _sweepTimer;
-        
+
         internal WebSocketSessionManager()
         {
             _sweepLock = new object();
@@ -154,7 +154,7 @@ namespace WebSocketSharp.Server
                     stopSweepTimer();
             }
         }
-        
+
         private void broadcast(byte[] data)
         {
             lock (_syncRoot)
@@ -230,7 +230,10 @@ namespace WebSocketSharp.Server
         internal bool Remove(Guid id)
         {
             ServerSession context;
-            return _sessions.TryRemove(id, out context);
+            var removed = _sessions.TryRemove(id, out context);
+            if (removed)
+                context.Dispose();
+            return removed;
         }
 
         /// <summary>
@@ -313,10 +316,13 @@ namespace WebSocketSharp.Server
 
                     ServerSession session;
                     if (_sessions.TryRemove(id, out session))
+                    {
                         session.WebSocket.Close(CloseStatusCode.NORMAL, "Session timeout");
-                }
+                        session.Dispose();
+                    }
 
-                _isSweeping = false;
+                    _isSweeping = false;
+                }
             }
         }
 
@@ -337,6 +343,6 @@ namespace WebSocketSharp.Server
             return _sessions.TryGetValue(id, out session);
         }
 
-        
+
     }
 }

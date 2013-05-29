@@ -342,11 +342,7 @@ namespace WebSocketSharp.Server
         {
             onError(message);
         }
-
-
-
-
-
+        
         /// <summary>
         /// Starts to receive the WebSocket connection requests.
         /// </summary>
@@ -368,6 +364,7 @@ namespace WebSocketSharp.Server
                 return;
 
             _tcpListener.Stop();
+            
             _receiveRequestThread.Join(5 * 1000);
         }
 

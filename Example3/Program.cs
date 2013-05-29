@@ -16,15 +16,9 @@ namespace Example3
       _httpsv.AddWebSocketService<Echo>("/Echo");
       _httpsv.AddWebSocketService<Chat>("/Chat");
 
-      _httpsv.OnGet += (sender, e) =>
-      {
-        onGet(e);
-      };
+      _httpsv.OnGet += (sender, e) => onGet(e);
 
-      _httpsv.OnError += (sender, e) =>
-      {
-        Console.WriteLine(e.Message);
-      };
+      _httpsv.OnError += (sender, e) => Console.WriteLine(e.Message);
 
       _httpsv.Start();
       Console.WriteLine("HTTP Server listening on port: {0} service path:", _httpsv.Port);

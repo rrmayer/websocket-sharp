@@ -1,44 +1,65 @@
 using System;
 using System.Threading;
 using WebSocketSharp;
+using WebSocketSharp.Net.WebSockets;
 using WebSocketSharp.Server;
 
-namespace Example2 {
+namespace Example2
+{
 
-  public class Chat : WebSocketService
-  {
-    private static int _num = 0;
-
-    private string _name;
-
-    private string getName()
+    public class ChatSession : ServerSession
     {
-      return QueryString.Exists("name")
-             ? QueryString["name"]
-             : "anon#" + getNum();
+        public string Name { get; set; }
+
+        public ChatSession(ServerWebSocket socket)
+            : base(socket)
+        {
+        }
     }
 
-    private int getNum()
+    public class Chat : IWebSocketService
     {
-      return Interlocked.Increment(ref _num);
-    }
+        private static int _num = 0;
 
-    protected override void OnOpen()
-    {
-      _name = getName();
-    }
+        private static string getName(WebSocketContext context)
+        {
+            return context.QueryString.Exists("name")
+                   ? context.QueryString["name"]
+                   : "anon#" + getNum();
+        }
 
-    protected override void OnMessage(MessageEventArgs e)
-    {
-      
-      var msg = String.Format("{0}: {1}", _name, e.Data);
-      Broadcast(msg);
-    }
+        private static int getNum()
+        {
+            return Interlocked.Increment(ref _num);
+        }
 
-    protected override void OnClose(CloseEventArgs e)
-    {
-      var msg = String.Format("{0} got logged off...", _name);
-      Broadcast(msg);
+        public void OnOpen(ServerSession session)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnReceive(ServerSession session, MessageEventArgs e)
+        {
+            var msg = String.Format("{0}: {1}", ((ChatSession)session).Name, e.Data);
+            ServiceHost.Broadcast(msg);
+        }
+
+        public void OnClose(ServerSession session, CloseEventArgs e)
+        {
+            var msg = String.Format("{0} got logged off...", ((ChatSession)session).Name);
+            ServiceHost.Broadcast(msg);
+        }
+
+        public void OnError(ServerSession session, ErrorEventArgs e)
+        {
+            //Do nothing.
+        }
+
+        public IWebSocketServiceHost ServiceHost { set; private get; }
+
+        public Func<ServerWebSocket, ServerSession> SessionFactory
+        {
+            get { return (a) => new ChatSession(a) {Name = getName(a.Context)}; }
+        }
     }
-  }
 }

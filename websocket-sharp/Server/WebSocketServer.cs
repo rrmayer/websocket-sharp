@@ -45,12 +45,7 @@ namespace WebSocketSharp.Server
     /// </remarks>
     public sealed class WebSocketServer : WebSocketServerBase
     {
-        
-
         private ServiceHostManager _svcHosts;
-
-        
-
         
 
         /// <summary>
@@ -199,6 +194,7 @@ namespace WebSocketSharp.Server
         /// <summary>
         /// Accepts a WebSocket connection request.
         /// </summary>
+        /// <param name="webSocket">
         /// A <see cref="TcpListenerWebSocketContext"/> that contains the WebSocket connection request objects.
         /// </param>
         protected override void AcceptWebSocket(ServerWebSocket webSocket)

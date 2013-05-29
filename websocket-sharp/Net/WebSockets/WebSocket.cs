@@ -50,7 +50,6 @@ namespace WebSocketSharp.Net.WebSockets
     {
         private const int FragmentLen = 1016; // Max value is int.MaxValue - 14.
         
-        private bool _client;
         private CompressionMethod _compression;
         private AutoResetEvent _exitReceiving;
         protected readonly Object _closeLock;
@@ -302,7 +301,7 @@ namespace WebSocketSharp.Net.WebSockets
                 return false;
             }
 
-            var frame = WebSocketFrame.CreateControlFrame(Opcode.PING, new PayloadData(buffer), _client);
+            var frame = WebSocketFrame.CreateControlFrame(Opcode.PING, new PayloadData(buffer), IsClientWebSocket);
             if (!send(frame))
                 return false;
 
@@ -311,7 +310,7 @@ namespace WebSocketSharp.Net.WebSockets
 
         private void pong(PayloadData data)
         {
-            var frame = WebSocketFrame.CreateControlFrame(Opcode.PONG, data, _client);
+            var frame = WebSocketFrame.CreateControlFrame(Opcode.PONG, data, IsClientWebSocket);
             send(frame);
         }
 
@@ -572,7 +571,7 @@ namespace WebSocketSharp.Net.WebSockets
 
         private bool send(Fin fin, Opcode opcode, byte[] data, bool compressed)
         {
-            var frame = WebSocketFrame.CreateDataFrame(fin, opcode, new PayloadData(data), _compression, compressed, _client);
+            var frame = WebSocketFrame.CreateDataFrame(fin, opcode, new PayloadData(data), _compression, compressed, IsClientWebSocket);
             return send(frame);
         }
 
@@ -682,10 +681,7 @@ namespace WebSocketSharp.Net.WebSockets
 
             close(new PayloadData(data));
         }
-
-
-
-
+        
 
         /// <summary>
         /// Closes the WebSocket connection and releases all associated resources.
@@ -706,7 +702,7 @@ namespace WebSocketSharp.Net.WebSockets
                     return;
 
                 // Whether the closing handshake on server is started before the connection has been established?
-                if (State == WebSocketState.CONNECTING && !_client)
+                if (State == WebSocketState.CONNECTING && !IsClientWebSocket)
                 {
                     sendClosingResponseHandshake(HttpStatusCode.BadRequest);
                     onClose(new CloseEventArgs(data));
@@ -858,7 +854,7 @@ namespace WebSocketSharp.Net.WebSockets
             if (message.IsNull())
                 message = String.Empty;
 
-            return _client
+            return IsClientWebSocket
                    ? ping(message, 5 * 1000)
                    : ping(message, 1 * 1000);
         }
