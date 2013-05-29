@@ -195,39 +195,29 @@ namespace WebSocketSharp.Server
         {
             _svcHosts = new ServiceHostManager();
         }
-
         
-
-        
-
         /// <summary>
         /// Accepts a WebSocket connection request.
         /// </summary>
-        /// <param name="context">
         /// A <see cref="TcpListenerWebSocketContext"/> that contains the WebSocket connection request objects.
         /// </param>
-        protected override void AcceptWebSocket(TcpListenerWebSocketContext context)
+        protected override void AcceptWebSocket(ServerWebSocket webSocket)
         {
-            var websocket = context.WebSocket;
-            var path = context.Path.UrlDecode();
+            var path = webSocket.Context.Path.UrlDecode();
 
             IWebSocketServiceHost svcHost;
             if (!_svcHosts.TryGetServiceHost(path, out svcHost))
             {
-                websocket.Close(HttpStatusCode.NotImplemented);
+                webSocket.Close(HttpStatusCode.NotImplemented);
                 return;
             }
 
-            if (BaseUri.IsAbsoluteUri)
-                websocket.Url = new Uri(BaseUri, path);
+            //if (BaseUri.IsAbsoluteUri)
+            //    webSocket.Context.RequestUri = new Uri(BaseUri, path);
 
-            svcHost.NewWebSocketClient(context);
+            svcHost.AddWebSocketSession(webSocket);
         }
-
         
-
-        
-
         /// <summary>
         /// Adds the specified type WebSocket service.
         /// </summary>
@@ -237,11 +227,13 @@ namespace WebSocketSharp.Server
         /// <typeparam name="T">
         /// The type of the WebSocket service. The T must inherit the <see cref="WebSocketService"/> class.
         /// </typeparam>
-        public void AddWebSocketService<T>(string absPath)
+        public WebSocketServer AddWebSocketService<T>(string absPath)
           where T : IWebSocketService, new()
         {
             var svcHost = new WebSocketServiceHost<T>(absPath);
             AddWebSocketService(svcHost, absPath);
+
+            return this;
         }
 
         /// <summary>

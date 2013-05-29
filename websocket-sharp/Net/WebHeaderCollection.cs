@@ -51,18 +51,11 @@ namespace WebSocketSharp.Net {
 	[Serializable]
 	[ComVisible (true)]
 	public class WebHeaderCollection : NameValueCollection, ISerializable {
-
-		
-
-		static readonly Dictionary<string, HttpHeaderInfo> headers;
+        static readonly Dictionary<string, HttpHeaderInfo> headers;
 
 		bool           internallyCreated;
 		HttpHeaderType state;
-
-		
-
-		
-
+        
 		static WebHeaderCollection () 
 		{
 			headers = new Dictionary<string, HttpHeaderInfo> (StringComparer.InvariantCultureIgnoreCase)

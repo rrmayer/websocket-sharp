@@ -58,13 +58,13 @@ namespace WebSocketSharp
     public static class Ext
     {
 
-        
+
 
         private const string _tspecials = "()<>@,;:\\\"/[]?={} \t";
 
-        
 
-        
+
+
 
         private static byte[] compress(this byte[] value)
         {
@@ -149,9 +149,9 @@ namespace WebSocketSharp
                 act();
         }
 
-        
 
-        
+
+
 
         internal static byte[] Append(this ushort code, string reason)
         {
@@ -295,10 +295,6 @@ namespace WebSocketSharp
                 yield return buffer.ToString();
         }
 
-        
-
-        
-
         /// <summary>
         /// Accepts a WebSocket connection by the <see cref="TcpListener"/>.
         /// </summary>
@@ -314,13 +310,13 @@ namespace WebSocketSharp
         /// <exception cref="ArgumentNullException">
         /// <paramref name="listener"/> is <see langword="null"/>.
         /// </exception>
-        public static TcpListenerWebSocketContext AcceptWebSocket(this TcpListener listener, bool secure)
+        public static ServerWebSocket AcceptWebSocket(this TcpListener listener, bool secure)
         {
             if (listener.IsNull())
                 throw new ArgumentNullException("listener");
 
             var client = listener.AcceptTcpClient();
-            return new TcpListenerWebSocketContext(client, secure);
+            return new ServerWebSocket(client, secure);
         }
 
         /// <summary>
@@ -338,7 +334,7 @@ namespace WebSocketSharp
         /// <exception cref="ArgumentNullException">
         /// <paramref name="listener"/> is <see langword="null"/>.
         /// </exception>
-        public static void AcceptWebSocketAsync(this TcpListener listener, bool secure, Action<TcpListenerWebSocketContext> completed)
+        public static void AcceptWebSocketAsync(this TcpListener listener, bool secure, Action<ServerWebSocket> completed)
         {
             if (listener.IsNull())
                 throw new ArgumentNullException("listener");
@@ -346,7 +342,7 @@ namespace WebSocketSharp
             AsyncCallback callback = (ar) =>
             {
                 var client = listener.EndAcceptTcpClient(ar);
-                var context = new TcpListenerWebSocketContext(client, secure);
+                var context = new ServerWebSocket(client, secure);
                 completed(context);
             };
 
@@ -368,11 +364,8 @@ namespace WebSocketSharp
         /// </param>
         public static bool Contains(this string str, params char[] chars)
         {
-            return str.IsNullOrEmpty()
-                   ? false
-                   : chars.Length == 0
-                     ? true
-                     : str.IndexOfAny(chars) != -1;
+            return !str.IsNullOrEmpty()
+                   && (chars.Length == 0 || str.IndexOfAny(chars) != -1);
         }
 
         /// <summary>
@@ -461,9 +454,8 @@ namespace WebSocketSharp
         /// </param>
         public static bool Exists(this NameValueCollection collection, string name)
         {
-            return collection.IsNull()
-                   ? false
-                   : !collection[name].IsNull();
+            return !collection.IsNull()
+                   && !collection[name].IsNull();
         }
 
         /// <summary>
@@ -490,11 +482,7 @@ namespace WebSocketSharp
             if (values.IsNull())
                 return false;
 
-            foreach (string v in values.Split(','))
-                if (String.Compare(v.Trim(), value, true) == 0)
-                    return true;
-
-            return false;
+            return values.Split(',').Any(v => String.Compare(v.Trim(), value, true) == 0);
         }
 
         /// <summary>
@@ -711,11 +699,7 @@ namespace WebSocketSharp
         /// </param>
         public static bool IsCloseStatusCode(this ushort code)
         {
-            return code < 1000
-                   ? false
-                   : code > 4999
-                     ? false
-                     : true;
+            return code > 1000 && code < 4999;
         }
 
         /// <summary>
@@ -746,9 +730,9 @@ namespace WebSocketSharp
         /// </param>
         public static bool IsEnclosedIn(this string str, char c)
         {
-            return str.IsNullOrEmpty()
-                   ? false
-                   : str[0] == c && str[str.Length - 1] == c;
+            return !str.IsNullOrEmpty()
+                    && str[0] == c
+                    && str[str.Length - 1] == c;
         }
 
         /// <summary>
@@ -789,11 +773,7 @@ namespace WebSocketSharp
 
             var host = System.Net.Dns.GetHostName();
             var addrs = System.Net.Dns.GetHostAddresses(host);
-            foreach (var addr in addrs)
-                if (address.Equals(addr))
-                    return true;
-
-            return false;
+            return addrs.Contains(address);
         }
 
         /// <summary>
@@ -1102,22 +1082,18 @@ namespace WebSocketSharp
             var readData = new List<byte>();
             var readBuffer = new byte[bufferLength];
             long readLen = 0;
-            var tmpLen = 0;
 
             Action<byte[]> read = (buffer) =>
-            {
-                tmpLen = stream.Read(buffer, 0, buffer.Length);
-                if (tmpLen > 0)
-                {
-                    readLen += tmpLen;
-                    readData.AddRange(buffer.SubArray(0, tmpLen));
-                }
-            };
+                                      {
+                                          var tmpLen = stream.Read(buffer, 0, buffer.Length);
+                                          if (tmpLen > 0)
+                                          {
+                                              readLen += tmpLen;
+                                              readData.AddRange(buffer.SubArray(0, tmpLen));
+                                          }
+                                      };
 
-            count.Times(() =>
-            {
-                read(readBuffer);
-            });
+            count.Times(() => read(readBuffer));
 
             if (rem > 0)
                 read(new byte[rem]);
@@ -1159,7 +1135,7 @@ namespace WebSocketSharp
             if (startIndex == 0 && array.Length == length)
                 return array;
 
-            T[] subArray = new T[length];
+            var subArray = new T[length];
             Array.Copy(array, startIndex, subArray, 0, length);
 
             return subArray;
@@ -1650,7 +1626,5 @@ namespace WebSocketSharp
             output.Write(content, 0, content.Length);
             output.Close();
         }
-
-        
     }
 }

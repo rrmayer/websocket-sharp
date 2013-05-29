@@ -28,6 +28,7 @@
  */
 
 
+using System;
 using System.Collections.Generic;
 using WebSocketSharp.Net.WebSockets;
 
@@ -43,10 +44,9 @@ namespace WebSocketSharp.Server
     /// <typeparam name="T">
     /// The type of the WebSocket service that the server provides. The T must inherit the <see cref="WebSocketService"/> class.
     /// </typeparam>
-    public class WebSocketServiceHost<T> : IWebSocketServiceHost
+    public sealed class WebSocketServiceHost<T> : IWebSocketServiceHost
       where T : IWebSocketService, new()
     {
-
         private readonly WebSocketSessionManager _sessions;
         private readonly T _serviceImpl;
 
@@ -94,24 +94,24 @@ namespace WebSocketSharp.Server
         /// <summary>
         /// Accepts a WebSocket connection request.
         /// </summary>
-        /// <param name="context">
+        /// <param name="session">
         /// A <see cref="TcpListenerWebSocketContext"/> that contains the WebSocket connection request objects.
         /// </param>
-        public void NewWebSocketClient(WebSocketContext context)
+        public void AddWebSocketSession(ServerWebSocket webSocket)
         {
-            context.WebSocket.OnClose += (o, e) => _sessions.Remove(context.Id);
-            context.WebSocket.OnClose += (o, e) => _serviceImpl.OnClose(context, e);
-            context.WebSocket.OnMessage += (o, e) => _serviceImpl.OnMessage(context, e);
-            context.WebSocket.OnError += (o, e) => _serviceImpl.OnError(context, e);
+            var session = _serviceImpl.SessionFactory(webSocket);
 
-            _sessions.Add(context);
-            _serviceImpl.OnOpen(context);
+            session.WebSocket.OnClose += (o, e) => _sessions.Remove(session.Id);
+            session.WebSocket.OnClose += (o, e) => _serviceImpl.OnClose(session, e);
+            session.WebSocket.OnMessage += (o, e) => _serviceImpl.OnReceive(session, e);
+            session.WebSocket.OnError += (o, e) => _serviceImpl.OnError(session, e);
+
+            _sessions.Add(session);
+            _serviceImpl.OnOpen(session);
         }
 
-        public IEnumerable<WebSocketContext> CurrentSessions { get { return _sessions.AllSessions; }}
-
-            
-
+        public IEnumerable<ServerSession> CurrentSessions { get { return _sessions.AllSessions; } }
+        
         /// <summary>
         /// Broadcasts the specified <see cref="string"/> to all clients.
         /// </summary>
@@ -144,11 +144,11 @@ namespace WebSocketSharp.Server
         /// <param name="message">
         /// A <see cref="string"/> that contains a message.
         /// </param>
-        public Dictionary<string, bool> Broadping(string message)
+        public Dictionary<Guid, bool> Broadping(string message)
         {
             return _sessions.Broadping(message);
         }
 
-        
+
     }
 }

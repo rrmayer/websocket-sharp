@@ -44,9 +44,6 @@ namespace WebSocketSharp.Server
     /// </remarks>
     public abstract class WebSocketServerBase
     {
-
-        
-
         private Thread _receiveRequestThread;
         private IPAddress _address;
         private bool _isSecure;
@@ -54,10 +51,6 @@ namespace WebSocketSharp.Server
         private int _port;
         private TcpListener _tcpListener;
         private Uri _uri;
-
-        
-
-        
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WebSocketServerBase"/> class.
@@ -143,19 +136,20 @@ namespace WebSocketSharp.Server
                 throw new ArgumentException(msg);
             }
 
-            _address = address;
-            _port = port > 0
+            port = port > 0
                       ? port
                       : secure ? 443 : 80;
-            _uri = absPath.ToUri();
-            _isSecure = secure;
 
-            init();
+            var uri = new UriBuilder()
+                       {
+                           Host = address.ToString(),
+                           Port = port,
+                           Path = absPath,
+                           Scheme = secure ? "wss" : "ws"
+                       }.Uri;
+
+            init(uri);
         }
-
-        
-
-        
 
         /// <summary>
         /// Gets or sets the WebSocket URL on which to listen for incoming connection attempts.
@@ -175,9 +169,6 @@ namespace WebSocketSharp.Server
                 _uri = value;
             }
         }
-
-        
-
         
 
         /// <summary>
@@ -236,40 +227,26 @@ namespace WebSocketSharp.Server
             }
         }
 
-        
-
-        
-
         /// <summary>
         /// Occurs when the server gets an error.
         /// </summary>
         public event EventHandler<ErrorEventArgs> OnError;
 
-        
-
-        
-
-        private void acceptWebSocketAsync(TcpListenerWebSocketContext context)
+        private void acceptWebSocketAsync(ServerWebSocket socket)
         {
             WaitCallback callback = (state) =>
-            {
-                try
-                {
-                    AcceptWebSocket(context);
-                }
-                catch (Exception ex)
-                {
-                    onError(ex.Message);
-                }
-            };
+                                        {
+                                            try
+                                            {
+                                                AcceptWebSocket(socket);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                onError(ex.Message);
+                                            }
+                                        };
 
             ThreadPool.QueueUserWorkItem(callback);
-        }
-
-        private void init()
-        {
-            _tcpListener = new TcpListener(_address, _port);
-            _isSelfHost = true;
         }
 
         private void init(Uri uri)
@@ -281,20 +258,21 @@ namespace WebSocketSharp.Server
 
             _uri = uri;
             _address = addrs[0];
-            _isSecure = scheme == "wss" ? true : false;
+            _isSecure = scheme == "wss";
             _port = port > 0
                         ? port
                         : _isSecure ? 443 : 80;
 
-            init();
+            _tcpListener = new TcpListener(_address, _port);
+            _isSelfHost = true;
         }
 
         private void onError(string message)
         {
 #if DEBUG
-      var callerFrame = new StackFrame(1);
-      var caller      = callerFrame.GetMethod();
-      Console.WriteLine("WSSV: Error@{0}: {1}", caller.Name, message);
+            var callerFrame = new StackFrame(1);
+            var caller = callerFrame.GetMethod();
+            Console.WriteLine("WSSV: Error@{0}: {1}", caller.Name, message);
 #endif
             OnError.Emit(this, new ErrorEventArgs(message));
         }
@@ -305,8 +283,8 @@ namespace WebSocketSharp.Server
             {
                 try
                 {
-                    var context = _tcpListener.AcceptWebSocket(_isSecure);
-                    acceptWebSocketAsync(context);
+                    var socket = _tcpListener.AcceptWebSocket(_isSecure);
+                    acceptWebSocketAsync(socket);
                 }
                 catch (SocketException)
                 {
@@ -323,8 +301,7 @@ namespace WebSocketSharp.Server
 
         private void startReceiveRequestThread()
         {
-            _receiveRequestThread = new Thread(new ThreadStart(receiveRequest));
-            _receiveRequestThread.IsBackground = true;
+            _receiveRequestThread = new Thread(receiveRequest) { IsBackground = true };
             _receiveRequestThread.Start();
         }
 
@@ -343,9 +320,9 @@ namespace WebSocketSharp.Server
             return true;
         }
 
-        
 
-        
+
+
 
         /// <summary>
         /// Accepts a WebSocket connection request.
@@ -353,7 +330,7 @@ namespace WebSocketSharp.Server
         /// <param name="context">
         /// A <see cref="TcpListenerWebSocketContext"/> that contains the WebSocket connection request objects.
         /// </param>
-        protected abstract void AcceptWebSocket(TcpListenerWebSocketContext context);
+        protected abstract void AcceptWebSocket(ServerWebSocket socket);
 
         /// <summary>
         /// Occurs the <see cref="WebSocketServerBase.OnError"/> event with the specified <see cref="string"/>.
@@ -366,9 +343,9 @@ namespace WebSocketSharp.Server
             onError(message);
         }
 
-        
 
-        
+
+
 
         /// <summary>
         /// Starts to receive the WebSocket connection requests.
@@ -394,6 +371,6 @@ namespace WebSocketSharp.Server
             _receiveRequestThread.Join(5 * 1000);
         }
 
-        
+
     }
 }

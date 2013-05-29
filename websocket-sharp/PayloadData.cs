@@ -29,14 +29,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text;
 
 namespace WebSocketSharp {
 
-  internal class PayloadData : IEnumerable<byte>
+  public class PayloadData : IEnumerable<byte>
   {
     
 

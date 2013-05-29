@@ -85,8 +85,10 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Ext.cs" />
+    <Compile Include="HeaderConstants.cs" />
     <Compile Include="Net\WebSockets\ClientWebSocket.cs" />
     <Compile Include="Net\WebSockets\ClientWebSocketOptions.cs" />
+    <Compile Include="Server\ServerSession.cs" />
     <Compile Include="Net\WebSockets\ServerWebSocket.cs" />
     <Compile Include="Server\IWebSocketService.cs" />
     <Compile Include="WebSocketState.cs" />

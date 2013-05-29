@@ -33,28 +33,17 @@ using System.Threading.Tasks;
 
 namespace WebSocketSharp.Server
 {
-
     internal class ServiceHostManager
     {
-        
-
         private readonly ConcurrentDictionary<string, IWebSocketServiceHost> _svcHosts;
         private bool _autoCleanOldSessions;
-
         
-
-        
-
         public ServiceHostManager()
         {
             _svcHosts = new ConcurrentDictionary<string, IWebSocketServiceHost>();
             _autoCleanOldSessions = true;
         }
-
         
-
-        
-
         public int Count
         {
             get
@@ -96,9 +85,6 @@ namespace WebSocketSharp.Server
                 }
             }
         }
-
-        
-
         
 
         public void Add(string absPath, IWebSocketServiceHost svcHost)

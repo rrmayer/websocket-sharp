@@ -41,25 +41,14 @@ namespace WebSocketSharp.Net {
 	// What happens when we set content-length to X and write X-1 bytes then close?
 	// what if we don't set content-length at all?
 	class ResponseStream : Stream {
-
-		
-
+        
 		static byte [] crlf = new byte [] { 13, 10 };
-
-		
-
-		
-
-		bool                 disposed;
+        bool                 disposed;
 		bool                 ignore_errors;
 		HttpListenerResponse response;
 		Stream               stream;
 		bool                 trailer_sent;
-
-		
-
-		
-
+        
 		internal ResponseStream (System.IO.Stream stream, HttpListenerResponse response, bool ignore_errors)
 		{
 			this.stream = stream;
@@ -92,10 +81,6 @@ namespace WebSocketSharp.Net {
 			set { throw new NotSupportedException (); }
 		}
 
-		
-
-		
-
 		static byte [] GetChunkSizeBytes (int size, bool final)
 		{
 			string str = String.Format ("{0:x}\r\n{1}", size, final ? "\r\n" : "");
@@ -113,10 +98,6 @@ namespace WebSocketSharp.Net {
 			return ms;
 		}
 
-		
-
-		
-
 		internal void InternalWrite (byte [] buffer, int offset, int count)
 		{
 			if (ignore_errors) {
@@ -128,11 +109,7 @@ namespace WebSocketSharp.Net {
 				stream.Write (buffer, offset, count);
 			}
 		}
-
-		
-
-		
-
+        
 		public override IAsyncResult BeginRead (
 			byte [] buffer,
 			int offset,

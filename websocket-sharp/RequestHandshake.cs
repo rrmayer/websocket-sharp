@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -38,22 +39,22 @@ namespace WebSocketSharp
 {
     internal class RequestHandshake : Handshake
     {
-        private const string Version = "13";
-        private string _base64Key;
+        public const string Version = "13";
+        private readonly string _base64Key;
 
         private NameValueCollection _queryString;
 
-        public RequestHandshake(string uriString)
+        public RequestHandshake(Uri uri)
         {
             HttpMethod = "GET";
-            RequestUri = uriString.ToUri();
+            RequestUri = uri;
             AddHeader("User-Agent", "websocket-sharp/1.0");
             AddHeader("Upgrade", "websocket");
             AddHeader("Connection", "Upgrade");
-            AddHeader("Sec-WebSocket-Version", Version);
+            AddHeader(HeaderConstants.SEC_WEBSOCKET_VERSION, Version);
             _base64Key = createBase64Key();
 
-            AddHeader("Sec-WebSocket-Key", _base64Key);
+            AddHeader(HeaderConstants.SEC_WEBSOCKET_KEY, _base64Key);
         }
 
         private static string createBase64Key()
@@ -65,28 +66,28 @@ namespace WebSocketSharp
             return Convert.ToBase64String(src);
         }
 
-        public bool IsCorrespondingResponse(ResponseHandshake response)
-        {
-            return response.IsWebSocketResponse
-                    && response.HeaderExists("Sec-WebSocket-Accept", createResponseKey())
-                    && (!response.HeaderExists("Sec-WebSocket-Version") || response.HeaderExists("Sec-WebSocket-Version", Version));
-        }
+        public string Base64Key { get { return _base64Key; } }
 
-        private string createResponseKey()
-        {
-            SHA1 sha1 = new SHA1CryptoServiceProvider();
-            var sb = new StringBuilder(_base64Key);
-            sb.Append(Guid);
-            var src = sha1.ComputeHash(Encoding.UTF8.GetBytes(sb.ToString()));
+        //// As server
+        //private bool isValidRequesHandshake1544955205()
+        //{
+        //    return !Context.IsValid
+        //           ? false
+        //           : !isValidHostHeader()
+        //             ? false
+        //             : Context.Headers.Exists("Sec-WebSocket-Version", _version);
+        //}
 
-            return Convert.ToBase64String(src);
-        }
+        //public RequestHandshake CreateFromStream(Stream stream)
+        //{
+            
+        //}
 
         public bool IsValid
         {
             get
             {
-                return Headers.Exists("Sec-WebSocket-Version", Version);
+                return Headers.Exists(HeaderConstants.SEC_WEBSOCKET_VERSION, Version);
             }
         }
 
@@ -101,8 +102,8 @@ namespace WebSocketSharp
                        && !HeaderExists("Upgrade", "websocket")
                        && !HeaderExists("Connection", "Upgrade")
                        && !HeaderExists("Host")
-                       && !HeaderExists("Sec-WebSocket-Key")
-                       && HeaderExists("Sec-WebSocket-Version");
+                       && !HeaderExists(HeaderConstants.SEC_WEBSOCKET_KEY)
+                       && HeaderExists(HeaderConstants.SEC_WEBSOCKET_VERSION);
             }
         }
 
@@ -161,22 +162,24 @@ namespace WebSocketSharp
             for (int i = 1; i < request.Length; i++)
                 headers.SetInternal(request[i], false);
 
-            return new RequestHandshake
+            var httpMethod = requestLine[0];
+            var requestUri = requestLine[1].ToUri();
+            var protocolVersion = new Version(requestLine[2].Substring(5));
+
+            return new RequestHandshake(requestUri)
             {
                 Headers = headers,
-                HttpMethod = requestLine[0],
-                RequestUri = requestLine[1].ToUri(),
-                ProtocolVersion = new Version(requestLine[2].Substring(5))
+                HttpMethod = httpMethod,
+                ProtocolVersion = protocolVersion
             };
         }
 
-        public static RequestHandshake Parse(WebSocketContext context)
+        public static RequestHandshake FromContext(WebSocketContext context)
         {
-            return new RequestHandshake
+            return new RequestHandshake(context.RequestUri)
             {
                 Headers = context.Headers,
                 HttpMethod = "GET",
-                RequestUri = context.RequestUri,
                 ProtocolVersion = HttpVersion.Version11
             };
         }

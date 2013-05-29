@@ -35,176 +35,189 @@ using System.Security.Principal;
 using System.Text;
 using WebSocketSharp.Net.WebSockets;
 
-namespace WebSocketSharp.Net {
+namespace WebSocketSharp.Net
+{
 
-	/// <summary>
-	/// Provides access to the HTTP request and response objects used by the <see cref="HttpListener"/> class.
-	/// </summary>
-	/// <remarks>
-	/// The HttpListenerContext class cannot be inherited.
-	/// </remarks>
-	public sealed class HttpListenerContext {
+    /// <summary>
+    /// Provides access to the HTTP request and response objects used by the <see cref="HttpListener"/> class.
+    /// </summary>
+    /// <remarks>
+    /// The HttpListenerContext class cannot be inherited.
+    /// </remarks>
+    public sealed class HttpListenerContext
+    {
 
-		
 
-		HttpConnection       cnc;
-		string               error;
-		int                  err_status;
-		HttpListenerRequest  request;
-		HttpListenerResponse response;
-		IPrincipal           user;
 
-		
+        HttpConnection cnc;
+        string error;
+        int err_status;
+        HttpListenerRequest request;
+        HttpListenerResponse response;
+        IPrincipal user;
 
-		
 
-		internal HttpListener Listener;
 
-		
 
-		
 
-		internal HttpListenerContext (HttpConnection cnc)
-		{
-			this.cnc   = cnc;
-			err_status = 400;
-			request    = new HttpListenerRequest (this);
-			response   = new HttpListenerResponse (this);
-		}
+        internal HttpListener Listener;
 
-		
 
-		
 
-		internal HttpConnection Connection {
-			get { return cnc; }
-		}
 
-		internal string ErrorMessage {
-			get { return error; }
-			set { error = value; }
-		}
 
-		internal int ErrorStatus {
-			get { return err_status; }
-			set { err_status = value; }
-		}
+        internal HttpListenerContext(HttpConnection cnc)
+        {
+            this.cnc = cnc;
+            err_status = 400;
+            request = new HttpListenerRequest(this);
+            response = new HttpListenerResponse(this);
+        }
 
-		internal bool HaveError {
-			get { return (error != null); }
-		}
 
-		
 
-		
 
-		/// <summary>
-		/// Gets the <see cref="HttpListenerRequest"/> that contains the HTTP request from a client.
-		/// </summary>
-		/// <value>
-		/// A <see cref="HttpListenerRequest"/> that contains the HTTP request objects.
-		/// </value>
-		public HttpListenerRequest Request {
-			get { return request; }
-		}
 
-		/// <summary>
-		/// Gets the <see cref="HttpListenerResponse"/> that contains the HTTP response to send to
-		/// the client in response to the client's request.
-		/// </summary>
-		/// <value>
-		/// A <see cref="HttpListenerResponse"/> that contains the HTTP response objects.
-		/// </value>
-		public HttpListenerResponse Response {
-			get { return response; }
-		}
+        internal HttpConnection Connection
+        {
+            get { return cnc; }
+        }
 
-		/// <summary>
-		/// Gets the client information (identity, authentication information and security roles).
-		/// </summary>
-		/// <value>
-		/// A <see cref="IPrincipal"/> contains the client information.
-		/// </value>
-		public IPrincipal User {
-			get { return user; }
-		}
+        internal string ErrorMessage
+        {
+            get { return error; }
+            set { error = value; }
+        }
 
-		
+        internal int ErrorStatus
+        {
+            get { return err_status; }
+            set { err_status = value; }
+        }
 
-		
+        internal bool HaveError
+        {
+            get { return (error != null); }
+        }
 
-		internal void ParseAuthentication (AuthenticationSchemes expectedSchemes)
-		{
-			if (expectedSchemes == AuthenticationSchemes.Anonymous)
-				return;
 
-			// TODO: Handle NTLM/Digest modes
-			string header = request.Headers ["Authorization"];
-			if (header == null || header.Length < 2)
-				return;
 
-			string [] authenticationData = header.Split (new char [] {' '}, 2);
-			if (string.Compare (authenticationData [0], "basic", true) == 0) {
-				user = ParseBasicAuthentication (authenticationData [1]);
-			}
-			// TODO: throw if malformed -> 400 bad request
-		}
 
-		internal IPrincipal ParseBasicAuthentication (string authData)
-		{
-			try {
-				// Basic AUTH Data is a formatted Base64 String
-				//string domain = null;
-				string user       = null;
-				string password   = null;
-				int    pos        = -1;
-				string authString = Encoding.Default.GetString (Convert.FromBase64String (authData));
 
-				// The format is DOMAIN\username:password
-				// Domain is optional
+        /// <summary>
+        /// Gets the <see cref="HttpListenerRequest"/> that contains the HTTP request from a client.
+        /// </summary>
+        /// <value>
+        /// A <see cref="HttpListenerRequest"/> that contains the HTTP request objects.
+        /// </value>
+        public HttpListenerRequest Request
+        {
+            get { return request; }
+        }
 
-				pos = authString.IndexOf (':');
+        /// <summary>
+        /// Gets the <see cref="HttpListenerResponse"/> that contains the HTTP response to send to
+        /// the client in response to the client's request.
+        /// </summary>
+        /// <value>
+        /// A <see cref="HttpListenerResponse"/> that contains the HTTP response objects.
+        /// </value>
+        public HttpListenerResponse Response
+        {
+            get { return response; }
+        }
 
-				// parse the password off the end
-				password = authString.Substring (pos+1);
+        /// <summary>
+        /// Gets the client information (identity, authentication information and security roles).
+        /// </summary>
+        /// <value>
+        /// A <see cref="IPrincipal"/> contains the client information.
+        /// </value>
+        public IPrincipal User
+        {
+            get { return user; }
+        }
 
-				// discard the password
-				authString = authString.Substring (0, pos);
 
-				// check if there is a domain
-				pos = authString.IndexOf ('\\');
 
-				if (pos > 0) {
-					//domain = authString.Substring (0, pos);
-					user = authString.Substring (pos);
-				} else {
-					user = authString;
-				}
 
-				var identity = new System.Net.HttpListenerBasicIdentity (user, password);
-				// TODO: What are the roles MS sets
-				return new GenericPrincipal (identity, new string [0]);
-			} catch (Exception) {
-				// Invalid auth data is swallowed silently
-				return null;
-			} 
-		}
 
-		
+        internal void ParseAuthentication(AuthenticationSchemes expectedSchemes)
+        {
+            if (expectedSchemes == AuthenticationSchemes.Anonymous)
+                return;
 
-		
+            // TODO: Handle NTLM/Digest modes
+            string header = request.Headers["Authorization"];
+            if (header == null || header.Length < 2)
+                return;
 
-		/// <summary>
-		/// Accepts a WebSocket connection by the <see cref="HttpListener"/>.
-		/// </summary>
-		/// <returns>
-		/// A <see cref="HttpListenerWebSocketContext"/> that contains a WebSocket connection.
-		/// </returns>
-		public HttpListenerWebSocketContext AcceptWebSocket ()
-		{
-			return new HttpListenerWebSocketContext (this);
-		}
+            string[] authenticationData = header.Split(new char[] { ' ' }, 2);
+            if (string.Compare(authenticationData[0], "basic", true) == 0)
+            {
+                user = ParseBasicAuthentication(authenticationData[1]);
+            }
+            // TODO: throw if malformed -> 400 bad request
+        }
 
-		
-	}
+        internal IPrincipal ParseBasicAuthentication(string authData)
+        {
+            try
+            {
+                // Basic AUTH Data is a formatted Base64 String
+                //string domain = null;
+                string user = null;
+                string password = null;
+                int pos = -1;
+                string authString = Encoding.Default.GetString(Convert.FromBase64String(authData));
+
+                // The format is DOMAIN\username:password
+                // Domain is optional
+
+                pos = authString.IndexOf(':');
+
+                // parse the password off the end
+                password = authString.Substring(pos + 1);
+
+                // discard the password
+                authString = authString.Substring(0, pos);
+
+                // check if there is a domain
+                pos = authString.IndexOf('\\');
+
+                if (pos > 0)
+                {
+                    //domain = authString.Substring (0, pos);
+                    user = authString.Substring(pos);
+                }
+                else
+                {
+                    user = authString;
+                }
+
+                var identity = new System.Net.HttpListenerBasicIdentity(user, password);
+                // TODO: What are the roles MS sets
+                return new GenericPrincipal(identity, new string[0]);
+            }
+            catch (Exception)
+            {
+                // Invalid auth data is swallowed silently
+                return null;
+            }
+        }
+
+
+        /// <summary>
+        /// Accepts a WebSocket connection by the <see cref="HttpListener"/>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="HttpListenerWebSocketContext"/> that contains a WebSocket connection.
+        /// </returns>
+        public ServerWebSocket AcceptWebSocket()
+        {
+            return new ServerWebSocket(this);
+        }
+
+
+    }
 }

@@ -8,9 +8,6 @@ namespace WebSocketSharp.Net.WebSockets
 {
     public sealed class ClientWebSocket : WebSocket
     {
-        private string _base64Key;
-        private const string Guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-       
         public ClientWebSocketOptions Options { get; set; }
 
         /// <summary>
@@ -47,7 +44,7 @@ namespace WebSocketSharp.Net.WebSockets
         /// </summary>
         public void Connect(string url, params string[] protocols)
         {
-            if (isOpened(true))
+            if (IsOpened(true))
                 throw new InvalidOperationException(
                     "The WebSocket is currently connected.");
 
@@ -64,11 +61,11 @@ namespace WebSocketSharp.Net.WebSockets
             var host = uri.DnsSafeHost;
             var port = uri.Port;
             var client = new TcpClient(host, port);
-            WebSocketStream = WebSocketStream.CreateClientStream(client, host, IsSecure);
+            UnderlyingStream = WebSocketStream.CreateClientStream(client, host, IsSecure);
 
             try
             {
-                if (doHandshake())
+                if (doHandshake(uri))
                     onOpen();
             }
             catch (Exception ex)
@@ -79,17 +76,11 @@ namespace WebSocketSharp.Net.WebSockets
             }
         }
 
-        private static bool isCompressExtension(string value, CompressionMethod method)
-        {
-            var expected = createCompressExtension(method);
-            return (expected.IsEmpty() && value.Equals(expected));
-        }
-
         // As client
         private string createRequestExtensions()
         {
             var extensions = new StringBuilder(64);
-            var compress = createCompressExtension(_compression);
+            var compress = CreateCompressExtension(Compression);
             if (!compress.IsEmpty())
                 extensions.Append(compress);
 
@@ -106,36 +97,39 @@ namespace WebSocketSharp.Net.WebSockets
                      ? _uri.DnsSafeHost
                      : _uri.Authority;
 
-            var req = new RequestHandshake(path);
-            req.AddHeader("Host", host);
+            var req = new RequestHandshake(path.ToUri());
+            req.AddHeader(HeaderConstants.HOST, host);
 
-            if (!_origin.IsEmpty())
-                req.AddHeader("Origin", _origin);
+            if (!Origin.IsEmpty())
+                req.AddHeader(HeaderConstants.ORIGIN, Origin);
 
             if (!SubProtocol.IsNullOrEmpty())
-                req.AddHeader("Sec-WebSocket-Protocol", SubProtocol);
+                req.AddHeader(HeaderConstants.SEC_WEBSOCKET_PROTOCOL, SubProtocol);
 
             var extensions = createRequestExtensions();
             if (!extensions.IsEmpty())
-                req.AddHeader("Sec-WebSocket-Extensions", extensions);
+                req.AddHeader(HeaderConstants.SEC_WEBSOCKET_EXTENSIONS, extensions);
 
             if (Options.Cookies.Count > 0)
-                req.SetCookies(new CookieCollection(Options.Cookies.GetCookies(_uri).OfType<Cookie>()));
+                req.SetCookies(Options.Cookies);
 
             return req;
         }
 
         // As client
-        private bool doHandshake()
+        private bool doHandshake(Uri requestUri)
         {
-            sendRequestHandshake();
-            return processResponseHandshake();
+            var request = createRequestHandshake(requestUri);
+            send(request);
+
+            var response = receiveResponseHandshakeFromStream();  //todo: add timeout? currently 30 seconds.
+            return processResponseHandshake(request, response);
         }
 
         // As client
-        private ResponseHandshake receiveResponseHandshake()
+        private ResponseHandshake receiveResponseHandshakeFromStream()
         {
-            var res = ResponseHandshake.Parse(UnderlyingStream. readHandshake());
+            var res = ResponseHandshake.ReadFromStream(WebSocketStream);
 #if DEBUG
             Console.WriteLine("WS: Info@receiveResponseHandshake: Response handshake from server:\n");
             Console.WriteLine(res.ToString());
@@ -144,21 +138,11 @@ namespace WebSocketSharp.Net.WebSockets
         }
 
         // As client
-        private void send(RequestHandshake request)
-        {
-#if DEBUG
-            Console.WriteLine("WS: Info@send: Request handshake to server:\n");
-            Console.WriteLine(request.ToString());
-#endif
-            WebSocketStream.Write(request);
-        }
-
-        // As client
         private void processResponseCookies(CookieCollection cookies)
         {
             if (cookies == null)
                 throw new ArgumentNullException("cookies");
-            
+
             foreach (Cookie c in cookies)
                 Options.Cookies.Add(c);
         }
@@ -172,22 +156,21 @@ namespace WebSocketSharp.Net.WebSockets
                 foreach (var extension in extensions.SplitHeaderValue(','))
                 {
                     var e = extension.Trim();
-                    if (!compress && isCompressExtension(e, _compression))
+                    if (!compress && isCompressExtension(e, Compression))
                         compress = true;
                 }
 
-                _extensions = extensions;
+                Extensions = extensions;
             }
 
             if (!compress)
-                _compression = CompressionMethod.NONE;
+                Compression = CompressionMethod.NONE;
         }
 
         // As client
-        private bool processResponseHandshake()
+        private bool processResponseHandshake(RequestHandshake handshake, ResponseHandshake response)
         {
-            var res = receiveResponseHandshake();
-            if (!isValidResponseHandshake(res))
+            if (!response.IsCorrespondingResponse(handshake))
             {
                 var msg = "Invalid response to this WebSocket connection request.";
                 onError(msg);
@@ -196,42 +179,26 @@ namespace WebSocketSharp.Net.WebSockets
                 return false;
             }
 
-            processResponseProtocol(res.Headers["Sec-WebSocket-Protocol"]);
-            processResponseExtensions(res.Headers["Sec-WebSocket-Extensions"]);
-            processResponseCookies(res.Cookies);
+            SubProtocol = response.SubProtocol;
+            processResponseExtensions(response.Extensions);
+            processResponseCookies(response.Cookies);
 
             return true;
         }
 
         // As client
-        private void processResponseProtocol(string protocol)
-        {
-            if (!protocol.IsNullOrEmpty())
-                SubProtocol = protocol;
-        }
-
-        // As client
-        private void sendRequestHandshake()
-        {
-            var req = createRequestHandshake();
-            send(req);
-        }
-
-
-        // As client
         protected override void OnClosing()
         {
-            if (!WebSocketStream.IsNull())
+            if (!UnderlyingStream.IsNull())
             {
-                WebSocketStream.Dispose();
-                WebSocketStream = null;
+                UnderlyingStream.Dispose();
+                UnderlyingStream = null;
             }
+        }
 
-            if (UnderlyingStream.IsNull())
-                return;
-
-            UnderlyingStream.Close();
-            UnderlyingStream = null;
+        protected override bool IsClientWebSocket
+        {
+            get { return true; }
         }
     }
 }

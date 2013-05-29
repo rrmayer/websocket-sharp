@@ -226,11 +226,11 @@ namespace WebSocketSharp.Server
 
         private void onError(string message)
         {
-#if DEBUG
-      var callerFrame = new StackFrame(1);
-      var caller      = callerFrame.GetMethod();
-      Console.WriteLine("HTTPSV: Error@{0}: {1}", caller.Name, message);
-#endif
+//#if DEBUG
+//      var callerFrame = new StackFrame(1);
+//      var caller      = callerFrame.GetMethod();
+//      Console.WriteLine("HTTPSV: Error@{0}: {1}", caller.Name, message);
+//#endif
             OnError.Emit(this, new ErrorEventArgs(message));
         }
 
@@ -359,8 +359,8 @@ namespace WebSocketSharp.Server
         private bool upgradeToWebSocket(HttpListenerContext context)
         {
             var res = context.Response;
-            var wsContext = context.AcceptWebSocket();
-            var path = wsContext.Path.UrlDecode();
+            var socket = context.AcceptWebSocket();
+            var path = socket.Context.Path.UrlDecode();
 
             IWebSocketServiceHost svcHost;
             if (!_svcHosts.TryGetServiceHost(path, out svcHost))
@@ -369,13 +369,9 @@ namespace WebSocketSharp.Server
                 return false;
             }
 
-            svcHost.NewWebSocketClient(wsContext);
+            svcHost.AddWebSocketSession(socket);
             return true;
         }
-
-        
-
-        
 
         /// <summary>
         /// Adds the specified type WebSocket service.
@@ -384,9 +380,9 @@ namespace WebSocketSharp.Server
         /// A <see cref="string"/> that contains an absolute path associated with the WebSocket service.
         /// </param>
         /// <typeparam name="T">
-        /// The type of the WebSocket service. The T must inherit the <see cref="WebSocketService"/> class.
+        /// The type of the WebSocket service.  T must implement the <see cref="IWebSocketService"/> interface.
         /// </typeparam>
-        public void AddWebSocketService<T>(string absPath)
+        public HttpServer AddWebSocketService<T>(string absPath)
           where T : IWebSocketService, new()
         {
             string msg;
@@ -398,6 +394,7 @@ namespace WebSocketSharp.Server
                 svcHost.AutoCleanExpiredSessions = AutoCleanOldSessions;
 
             _svcHosts.Add(absPath, svcHost);
+            return this;
         }
 
         /// <summary>

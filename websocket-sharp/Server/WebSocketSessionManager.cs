@@ -36,50 +36,38 @@ using WebSocketSharp.Net.WebSockets;
 
 namespace WebSocketSharp.Server
 {
-
     /// <summary>
-    /// Manages the collection of <see cref="WebSocketService"/> objects.
+    /// Manages the collection of <see cref="ServerSession"/> objects.
     /// </summary>
-    public class WebSocketSessionManager
+    public sealed class WebSocketSessionManager
     {
-
-        
-
         private readonly object _sweepLock;
         private volatile bool _isStopped;
         private volatile bool _isSweeping;
         private readonly object _syncRoot;
-        private readonly ConcurrentDictionary<string, WebSocketContext> _contexts;
+        private readonly ConcurrentDictionary<Guid, ServerSession> _sessions;
         private Timer _sweepTimer;
-
         
-
-        
-
         internal WebSocketSessionManager()
         {
             _sweepLock = new object();
             _isStopped = false;
             _isSweeping = false;
-            _contexts = new ConcurrentDictionary<string, WebSocketContext>();
+            _sessions = new ConcurrentDictionary<Guid, ServerSession>();
             _syncRoot = new object();
 
             setSweepTimer();
             startSweepTimer();
         }
 
-        
-
-        
-
         /// <summary>
-        /// Gets the collection of IDs of active <see cref="WebSocketService"/> objects
+        /// Gets the collection of IDs of active <see cref="ServerSession"/> objects
         /// managed by the <see cref="WebSocketSessionManager"/>.
         /// </summary>
         /// <value>
-        /// An IEnumerable&lt;string&gt; that contains the collection of IDs of active <see cref="WebSocketService"/> objects.
+        /// An IEnumerable&lt;string&gt; that contains the collection of IDs of active <see cref="ServerSession"/> objects.
         /// </value>
-        public IEnumerable<string> ActiveIDs
+        public IEnumerable<Guid> ActiveIDs
         {
             get
             {
@@ -92,32 +80,32 @@ namespace WebSocketSharp.Server
         /// <summary>
         /// Gets a snapshot of all current sessions.
         /// </summary>
-        public IEnumerable<WebSocketContext> AllSessions { get { return _contexts.Values; } }
+        public IEnumerable<ServerSession> AllSessions { get { return _sessions.Values; } }
 
         /// <summary>
-        /// Gets the number of <see cref="WebSocketService"/> objects
+        /// Gets the number of <see cref="ServerSession"/> objects
         /// managed by the <see cref="WebSocketSessionManager"/>.
         /// </summary>
         /// <value>
-        /// An <see cref="int"/> that contains the number of <see cref="WebSocketService"/> objects
+        /// An <see cref="int"/> that contains the number of <see cref="ServerSession"/> objects
         /// managed by the <see cref="WebSocketSessionManager"/>.
         /// </value>
         public int Count
         {
             get
             {
-                return _contexts.Count;
+                return _sessions.Count;
             }
         }
 
         /// <summary>
-        /// Gets the collection of IDs of inactive <see cref="WebSocketService"/> objects
+        /// Gets the collection of IDs of inactive <see cref="ServerSession"/> objects
         /// managed by the <see cref="WebSocketSessionManager"/>.
         /// </summary>
         /// <value>
-        /// An IEnumerable&lt;string&gt; that contains the collection of IDs of inactive <see cref="WebSocketService"/> objects.
+        /// An IEnumerable&lt;string&gt; that contains the collection of IDs of inactive <see cref="ServerSession"/> objects.
         /// </value>
-        public IEnumerable<string> InactiveIDs
+        public IEnumerable<Guid> InactiveIDs
         {
             get
             {
@@ -128,26 +116,26 @@ namespace WebSocketSharp.Server
         }
 
         /// <summary>
-        /// Gets the collection of IDs of <see cref="WebSocketService"/> objects
+        /// Gets the collection of IDs of <see cref="ServerSession"/> objects
         /// managed by the <see cref="WebSocketSessionManager"/>.
         /// </summary>
         /// <value>
-        /// An IEnumerable&lt;string&gt; that contains the collection of IDs of <see cref="WebSocketService"/> objects.
+        /// An IEnumerable&lt;string&gt; that contains the collection of IDs of <see cref="ServerSession"/> objects.
         /// </value>
-        public IEnumerable<string> IDs
+        public IEnumerable<Guid> IDs
         {
             get
             {
-                return _contexts.Keys;
+                return _sessions.Keys;
             }
         }
 
         /// <summary>
         /// Gets a value indicating whether the <see cref="WebSocketSessionManager"/> cleans up
-        /// the inactive <see cref="WebSocketService"/> objects periodically.
+        /// the inactive <see cref="ServerSession"/> objects periodically.
         /// </summary>
         /// <value>
-        /// <c>true</c> if the <see cref="WebSocketSessionManager"/> cleans up the inactive <see cref="WebSocketService"/> objects
+        /// <c>true</c> if the <see cref="WebSocketSessionManager"/> cleans up the inactive <see cref="ServerSession"/> objects
         /// every 60 seconds; otherwise, <c>false</c>.
         /// </value>
         public bool AutoCleanOldSessions
@@ -166,28 +154,24 @@ namespace WebSocketSharp.Server
                     stopSweepTimer();
             }
         }
-
         
-
-        
-
         private void broadcast(byte[] data)
         {
             lock (_syncRoot)
             {
-                foreach (var c in _contexts.Values)
+                foreach (var c in _sessions.Values)
                     c.WebSocket.Send(data);
             }
         }
 
         private void broadcast(string data)
         {
-            Parallel.ForEach(_contexts.Values, c => c.WebSocket.Send(data));
+            Parallel.ForEach(_sessions.Values, c => c.WebSocket.Send(data));
         }
 
         private void broadcastAsync(byte[] data, Action onComplete)
         {
-            var copied = _contexts.Values;
+            var copied = _sessions.Values;
             Task.Factory.StartNew(() =>
                                       {
                                           Parallel.ForEach(copied, i => i.WebSocket.Send(data));
@@ -198,7 +182,7 @@ namespace WebSocketSharp.Server
 
         private void broadcastAsync(string data, Action onComplete)
         {
-            var copied = _contexts.Values;
+            var copied = _sessions.Values;
             Task.Factory.StartNew(() =>
             {
                 Parallel.ForEach(copied, i => i.WebSocket.Send(data));
@@ -228,7 +212,7 @@ namespace WebSocketSharp.Server
                     return;
 
                 _isStopped = true;
-                Parallel.ForEach(_contexts.Values, context => context.WebSocket.Close(code, reason));
+                Parallel.ForEach(_sessions.Values, context => context.WebSocket.Close(code, reason));
             }
         }
 
@@ -238,26 +222,16 @@ namespace WebSocketSharp.Server
                 _sweepTimer.Stop();
         }
 
-        
-
-        
-
-        internal bool Add(WebSocketContext context)
+        internal bool Add(ServerSession context)
         {
-            if (_isStopped)
-                return false;
-            return _contexts.TryAdd(context.Id, context);
+            return !_isStopped && _sessions.TryAdd(context.Id, context);
         }
 
-        internal bool Remove(string id)
+        internal bool Remove(Guid id)
         {
-            WebSocketContext context;
-            return _contexts.TryRemove(id, out context);
+            ServerSession context;
+            return _sessions.TryRemove(id, out context);
         }
-
-        
-
-        
 
         /// <summary>
         /// Closes all sessions currently contained by this <see cref="WebSocketSesisonManager"/>
@@ -270,7 +244,7 @@ namespace WebSocketSharp.Server
         }
 
         /// <summary>
-        /// Broadcasts the specified array of <see cref="byte"/> to the clients of every <see cref="WebSocketService"/>
+        /// Broadcasts the specified array of <see cref="byte"/> to the clients of every <see cref="ServerSession"/>
         /// managed by the <see cref="WebSocketSessionManager"/>.
         /// </summary>
         /// <param name="data">
@@ -285,7 +259,7 @@ namespace WebSocketSharp.Server
         }
 
         /// <summary>
-        /// Broadcasts the specified <see cref="string"/> to the clients of every <see cref="WebSocketService"/>
+        /// Broadcasts the specified <see cref="string"/> to the clients of every <see cref="ServerSession"/>
         /// managed by the <see cref="WebSocketSessionManager"/>.
         /// </summary>
         /// <param name="data">
@@ -300,26 +274,26 @@ namespace WebSocketSharp.Server
         }
 
         /// <summary>
-        /// Pings with the specified <see cref="string"/> to the clients of every <see cref="WebSocketService"/>
+        /// Pings with the specified <see cref="string"/> to the clients of every <see cref="ServerSession"/>
         /// managed by the <see cref="WebSocketSessionManager"/>.
         /// </summary>
         /// <returns>
         /// A Dictionary&lt;string, bool&gt; that contains the collection of IDs and values
-        /// indicating whether each <see cref="WebSocketService"/> received a Pong in a time.
+        /// indicating whether each <see cref="ServerSession"/> received a Pong in a time.
         /// </returns>
         /// <param name="message">
         /// A <see cref="string"/> that contains a message.
         /// </param>
-        public Dictionary<string, bool> Broadping(string message)
+        public Dictionary<Guid, bool> Broadping(string message)
         {
-            var result = new ConcurrentDictionary<string, bool>();
-            Parallel.ForEach(_contexts.Values, context => result.TryAdd(context.Id, context.WebSocket.Ping(message)));
+            var result = new ConcurrentDictionary<Guid, bool>();
+            Parallel.ForEach(_sessions.Values, context => result.TryAdd(context.Id, context.WebSocket.Ping(message)));
 
             return result.ToDictionary(a => a.Key, a => a.Value);
         }
 
         /// <summary>
-        /// Cleans up the inactive <see cref="WebSocketService"/> objects.
+        /// Cleans up the inactive <see cref="ServerSession"/> objects.
         /// </summary>
         public void Sweep()
         {
@@ -337,9 +311,9 @@ namespace WebSocketSharp.Server
                         return;
                     }
 
-                    WebSocketContext context;
-                    if (_contexts.TryRemove(id, out context))
-                        context.WebSocket.Close(CloseStatusCode.NORMAL, "Session timeout");
+                    ServerSession session;
+                    if (_sessions.TryRemove(id, out session))
+                        session.WebSocket.Close(CloseStatusCode.NORMAL, "Session timeout");
                 }
 
                 _isSweeping = false;
@@ -347,20 +321,20 @@ namespace WebSocketSharp.Server
         }
 
         /// <summary>
-        /// Tries to get the <see cref="WebSocketService"/> associated with the specified <paramref name="id"/>.
+        /// Tries to get the <see cref="ServerSession"/> associated with the specified <paramref name="id"/>.
         /// </summary>
         /// <returns>
-        /// <c>true</c> if the <see cref="WebSocketSessionManager"/> manages the <see cref="WebSocketService"/> with the specified <paramref name="id"/>; otherwise, <c>false</c>.
+        /// <c>true</c> if the <see cref="WebSocketSessionManager"/> manages the <see cref="ServerSession"/> with the specified <paramref name="id"/>; otherwise, <c>false</c>.
         /// </returns>
         /// <param name="id">
         /// A <see cref="string"/> that contains the ID to find.
         /// </param>
         /// <param name="service">
-        /// When this method returns, contains the <see cref="WebSocketService"/> with the specified <paramref name="id"/>, if the <paramref name="id"/> is found; otherwise, <see langword="null"/>.
+        /// When this method returns, contains the <see cref="ServerSession"/> with the specified <paramref name="id"/>, if the <paramref name="id"/> is found; otherwise, <see langword="null"/>.
         /// </param>
-        public bool TryGetWebSocketService(string id, out WebSocketContext context)
+        public bool TryGetWebSocketSession(Guid id, out ServerSession session)
         {
-            return _contexts.TryGetValue(id, out context);
+            return _sessions.TryGetValue(id, out session);
         }
 
         

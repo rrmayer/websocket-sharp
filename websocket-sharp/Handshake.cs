@@ -33,35 +33,19 @@ using WebSocketSharp.Net;
 
 namespace WebSocketSharp
 {
-
-    internal abstract class Handshake
+    public abstract class Handshake
     {
-
-        
-
         protected const string _crlf = "\r\n";
-
-        
-
-        
 
         protected Handshake()
         {
             ProtocolVersion = HttpVersion.Version11;
             Headers = new NameValueCollection();
         }
-
         
-
-        
-
         public NameValueCollection Headers { get; internal set; }
         public Version ProtocolVersion { get; internal set; }
-
         
-
-        
-
         public void AddHeader(string name, string value)
         {
             Headers.Add(name, value);

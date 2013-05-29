@@ -10,7 +10,7 @@ namespace WebSocketSharp.Net.WebSockets
         /// <summary>
         /// Gets or sets the cookies associated with the request.
         /// </summary>
-        public CookieContainer Cookies { get; set; }
+        public CookieCollection Cookies { get; set; }
 
         /// <summary>
         /// Gets or sets the credential information for the client.
@@ -40,7 +40,7 @@ namespace WebSocketSharp.Net.WebSockets
         public ClientWebSocketOptions()
         {
             Headers = new Dictionary<string, string>();
-            Cookies = new CookieContainer();
+            Cookies = new CookieCollection();
             KeepAliveInterval = TimeSpan.FromSeconds(30);
             Credentials = new CredentialCache();
         }

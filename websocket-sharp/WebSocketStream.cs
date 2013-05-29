@@ -39,26 +39,16 @@ namespace WebSocketSharp
 {
     internal class WebSocketStream : Stream, IDisposable
     {
-        
-
         private Stream _innerStream;
         private bool _isSecure;
         private Object _forRead;
         private Object _forWrite;
-
-        
-
-        
 
         private WebSocketStream()
         {
             _forRead = new object();
             _forWrite = new object();
         }
-
-        
-
-        
 
         public WebSocketStream(NetworkStream innerStream)
             : this()
@@ -80,9 +70,30 @@ namespace WebSocketSharp
             _isSecure = true;
         }
 
-        
+        internal string[] ReadHandshake(TimeSpan timeout)
+        {
+            lock (_forRead)
+            {
+                var buffer = new List<byte>();
+                var start = DateTime.Now;
+                while (DateTime.Now - start <= timeout)
+                {
+                    if (ReadByte().EqualsAndSaveTo('\r', buffer) &&
+                        ReadByte().EqualsAndSaveTo('\n', buffer) &&
+                        ReadByte().EqualsAndSaveTo('\r', buffer) &&
+                        ReadByte().EqualsAndSaveTo('\n', buffer))
+                        break;
+                }
 
-        
+                if (DateTime.Now - start > timeout)
+                    throw new TimeoutException();
+
+                return Encoding.UTF8.GetString(buffer.ToArray())
+                    .Replace("\r\n", "\n").Replace("\n\n", "\n").TrimEnd('\n')
+                    .Split('\n');
+
+            }
+        }
 
         public bool DataAvailable
         {
@@ -99,10 +110,6 @@ namespace WebSocketSharp
             get { return _innerStream is SslStream; }
         }
 
-        
-
-        
-
         public override int Read(byte[] buffer, int offset, int size)
         {
             var readLen = _innerStream.Read(buffer, offset, size);
@@ -118,23 +125,6 @@ namespace WebSocketSharp
         public override int ReadByte()
         {
             return _innerStream.ReadByte();
-        }
-
-        private string[] readHandshake()
-        {
-            var buffer = new List<byte>();
-            while (true)
-            {
-                if (ReadByte().EqualsAndSaveTo('\r', buffer) &&
-                    ReadByte().EqualsAndSaveTo('\n', buffer) &&
-                    ReadByte().EqualsAndSaveTo('\r', buffer) &&
-                    ReadByte().EqualsAndSaveTo('\n', buffer))
-                    break;
-            }
-
-            return Encoding.UTF8.GetString(buffer.ToArray())
-                   .Replace("\r\n", "\n").Replace("\n\n", "\n").TrimEnd('\n')
-                   .Split('\n');
         }
 
         public override void Write(byte[] buffer, int offset, int count)
@@ -249,9 +239,9 @@ namespace WebSocketSharp
             _innerStream.SetLength(value);
         }
 
-        
 
-        
+
+
 
         internal static WebSocketStream CreateClientStream(TcpClient client, string host, bool secure)
         {
@@ -301,9 +291,9 @@ namespace WebSocketSharp
                    : new WebSocketStream((NetworkStream)stream);
         }
 
-        
 
-        
+
+
 
         public override void Close()
         {
@@ -342,26 +332,6 @@ namespace WebSocketSharp
             WebSocketFrame.ParseAsync(_innerStream, completed);
         }
 
-        internal string[] ReadHandshake()
-        {
-            lock (_forRead)
-            {
-                try
-                {
-                    return readHandshake();
-                }
-                catch
-                {
-                    return null;
-                }
-            }
-        }
-
-        internal string[] ReadHandshake(TimeSpan timeout)
-        {
-
-        }
-
         internal void Write(WebSocketFrame frame)
         {
             var bytes = frame.ToByteArray();
@@ -373,7 +343,5 @@ namespace WebSocketSharp
             var bytes = handshake.ToBytes();
             WriteBytes(bytes);
         }
-
-        
     }
 }

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using WebSocketSharp;
 using WebSocketSharp.Net;
+using WebSocketSharp.Net.WebSockets;
 
 namespace Example
 {

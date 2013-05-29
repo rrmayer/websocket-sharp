@@ -43,35 +43,16 @@ namespace WebSocketSharp.Net.WebSockets
     /// </remarks>
     public abstract class WebSocketContext
     {
-
-        
-
         /// <summary>
         /// Initializes a new instance of the <see cref="WebSocketSharp.Net.WebSockets.WebSocketContext"/> class.
         /// </summary>
         protected WebSocketContext()
         {
-            Id = Guid.NewGuid().ToString("N");
-            Properties = new Dictionary<string, object>();
+            //Id = Guid.NewGuid().ToString("N");
+            //Properties = new Dictionary<string, object>();
         }
 
-        
 
-        
-
-        /// <summary>
-        /// Returns custom properties associated with this context. These can be set through code,
-        /// for instance, to share context-specific details.
-        /// </summary>
-        public Dictionary<string, object> Properties { get; private set; }
-
-        /// <summary>
-        /// Gets the ID of the <see cref="WebSocketService"/> instance.
-        /// </summary>
-        /// <value>
-        /// A <see cref="string"/> that contains an ID.
-        /// </value>
-        public string Id { get; private set; }
 
         /// <summary>
         /// Gets the cookies used in the WebSocket opening handshake.
@@ -122,7 +103,7 @@ namespace WebSocketSharp.Net.WebSockets
         /// <value>
         /// <c>true</c> if the WebSocket connection is secured; otherwise, <c>false</c>.
         /// </value>
-        public bool IsSecure { get; protected set; }
+        public abstract bool IsSecure { get; }
 
         /// <summary>
         /// Gets a value indicating whether the WebSocket connection request is valid.
@@ -133,20 +114,18 @@ namespace WebSocketSharp.Net.WebSockets
         public abstract bool IsValid { get; }
 
         /// <summary>
-        /// Gets the value of the Origin header field used in the WebSocket opening handshake.
-        /// </summary>
-        /// <value>
-        /// A <see cref="string"/> that contains the value of the Origin header field.
-        /// </value>
-        public abstract string Origin { get; }
-
-        /// <summary>
         /// Gets the absolute path of the requested WebSocket URI.
         /// </summary>
         /// <value>
         /// A <see cref="string"/> that contains the absolute path of the requested WebSocket URI.
         /// </value>
-        public abstract string Path { get; }
+        public string Path
+        {
+            get
+            {
+                return RequestUri == null ? null : RequestUri.GetAbsolutePath();
+            }
+        }
 
         /// <summary>
         /// Gets the collection of query string variables used in the WebSocket opening handshake.
@@ -173,7 +152,7 @@ namespace WebSocketSharp.Net.WebSockets
         /// <value>
         /// A <see cref="string"/> that contains the value of the Sec-WebSocket-Key header field.
         /// </value>
-        public abstract string SecWebSocketKey { get; }
+        public string SecWebSocketKey { get { return Headers[HeaderConstants.SEC_WEBSOCKET_KEY]; } }
 
         /// <summary>
         /// Gets the values of the Sec-WebSocket-Protocol header field used in the WebSocket opening handshake.
@@ -184,7 +163,16 @@ namespace WebSocketSharp.Net.WebSockets
         /// <value>
         /// An IEnumerable&lt;string&gt; that contains the values of the Sec-WebSocket-Protocol header field.
         /// </value>
-        public abstract IEnumerable<string> SecWebSocketProtocols { get; }
+        public IEnumerable<string> SecWebSocketProtocols
+        {
+            get { return Headers.GetValues(HeaderConstants.SEC_WEBSOCKET_PROTOCOL); }
+        }
+
+
+        public IEnumerable<string> SecWebSocketExtensions
+        {
+            get { return Headers.GetValues(HeaderConstants.SEC_WEBSOCKET_EXTENSIONS); }
+        }
 
         /// <summary>
         /// Gets the value of the Sec-WebSocket-Version header field used in the WebSocket opening handshake.
@@ -195,7 +183,27 @@ namespace WebSocketSharp.Net.WebSockets
         /// <value>
         /// A <see cref="string"/> that contains the value of the Sec-WebSocket-Version header field.
         /// </value>
-        public abstract string SecWebSocketVersion { get; }
+        public string SecWebSocketVersion
+        {
+            get
+            {
+                return Headers[HeaderConstants.SEC_WEBSOCKET_VERSION];
+            }
+        }
+
+        /// <summary>
+        /// Gets the value of the Origin header field used in the WebSocket opening handshake.
+        /// </summary>
+        /// <value>
+        /// A <see cref="string"/> that contains the value of the Origin header field.
+        /// </value>
+        public string Origin
+        {
+            get
+            {
+                return Headers["Origin"];
+            }
+        }
 
         /// <summary>
         /// Gets the client information (identity, authentication information and security roles).
@@ -205,6 +213,6 @@ namespace WebSocketSharp.Net.WebSockets
         /// </value>
         public abstract IPrincipal User { get; }
 
-        
+
     }
 }

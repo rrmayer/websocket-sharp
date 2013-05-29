@@ -261,19 +261,13 @@ namespace WebSocketSharp.Net {
 		/// </value>
 		public bool IsWebSocketRequest {
 			get {
-				return method != "GET"
-					? false
-					: version < HttpVersion.Version11
-						? false
-						: !headers.Exists("Upgrade", "websocket")
-							? false
-							: !headers.Exists("Connection", "Upgrade")
-								? false
-								: !headers.Exists("Host")
-									? false
-									: !headers.Exists("Sec-WebSocket-Key")
-										? false
-										: headers.Exists("Sec-WebSocket-Version");
+				return method == "GET" 
+                    && version >= HttpVersion.Version11 
+                    && headers.Exists("Upgrade", "websocket") 
+                    && headers.Exists("Connection", "Upgrade") 
+                    && headers.Exists("Host") 
+                    && headers.Exists(HeaderConstants.SEC_WEBSOCKET_KEY)
+                    && headers.Exists(HeaderConstants.SEC_WEBSOCKET_VERSION);
 			}
 		}
 

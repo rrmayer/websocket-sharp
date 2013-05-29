@@ -1,14 +1,16 @@
-﻿using WebSocketSharp.Net.WebSockets;
+﻿using System;
+using WebSocketSharp.Net.WebSockets;
 
 namespace WebSocketSharp.Server
 {
     public interface IWebSocketService
     {
-        void OnOpen(WebSocketContext context);
-        void OnMessage(WebSocketContext context, MessageEventArgs e);
-        void OnClose(WebSocketContext context, CloseEventArgs e);
-        void OnError(WebSocketContext context, ErrorEventArgs e);
+        void OnOpen(ServerSession session);
+        void OnReceive(ServerSession session, MessageEventArgs e);
+        void OnClose(ServerSession session, CloseEventArgs e);
+        void OnError(ServerSession session, ErrorEventArgs e);
 
         IWebSocketServiceHost ServiceHost { set; }
+        Func<ServerWebSocket, ServerSession> SessionFactory { get; }
     }
 }

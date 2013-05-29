@@ -28,6 +28,7 @@
 
 using System;
 using System.Text;
+using WebSocketSharp.Net.WebSockets;
 
 namespace WebSocketSharp {
 

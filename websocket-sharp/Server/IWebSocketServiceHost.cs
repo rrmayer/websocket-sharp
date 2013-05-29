@@ -75,8 +75,8 @@ namespace WebSocketSharp.Server
         /// <summary>
         /// Informs the service host that a new client has joined.
         /// </summary>
-        void NewWebSocketClient(WebSocketContext context);
+        void AddWebSocketSession(ServerWebSocket socket);
 
-        IEnumerable<WebSocketContext> CurrentSessions { get; }
+        IEnumerable<ServerSession> CurrentSessions { get; }
     }
 }

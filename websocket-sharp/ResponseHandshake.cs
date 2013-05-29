@@ -27,34 +27,66 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 using WebSocketSharp.Net;
 
 namespace WebSocketSharp
 {
-
     internal class ResponseHandshake : Handshake
     {
-        
+        private const string Guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
-        public ResponseHandshake()
+        private ResponseHandshake()
             : this(HttpStatusCode.SwitchingProtocols)
         {
             AddHeader("Upgrade", "websocket");
             AddHeader("Connection", "Upgrade");
         }
 
-        public ResponseHandshake(HttpStatusCode code)
+        public ResponseHandshake(string base64Key)
+            : this()
+        {
+            AddHeader(HeaderConstants.SEC_WEBSOCKET_ACCEPT, createResponseKey(base64Key));
+        }
+
+        public bool IsCorrespondingResponse(RequestHandshake handshake)
+        {
+            return IsWebSocketResponse
+                    && HeaderExists(HeaderConstants.SEC_WEBSOCKET_ACCEPT, createResponseKey(handshake.Base64Key))
+                    && (!HeaderExists(HeaderConstants.SEC_WEBSOCKET_VERSION) || HeaderExists(HeaderConstants.SEC_WEBSOCKET_VERSION, RequestHandshake.Version));
+        }
+
+        public string SubProtocol
+        {
+            get { return Headers[HeaderConstants.SEC_WEBSOCKET_PROTOCOL]; }
+        }
+
+        public string Extensions
+        {
+            get { return Headers[HeaderConstants.SEC_WEBSOCKET_EXTENSIONS]; }
+        }
+
+
+        private string createResponseKey(string base64Key)
+        {
+            SHA1 sha1 = new SHA1CryptoServiceProvider();
+            var sb = new StringBuilder(base64Key);
+            sb.Append(ResponseHandshake.Guid);
+            var src = sha1.ComputeHash(Encoding.UTF8.GetBytes(sb.ToString()));
+
+            return Convert.ToBase64String(src);
+        }
+
+        private ResponseHandshake(HttpStatusCode code)
         {
             StatusCode = ((int)code).ToString();
             Reason = code.GetDescription();
             AddHeader("Server", "websocket-sharp/1.0");
         }
-
-        
-
-        
 
         public CookieCollection Cookies
         {
@@ -72,7 +104,7 @@ namespace WebSocketSharp
                     && StatusCode == "101"
                     && HeaderExists("Upgrade", "websocket")
                     && HeaderExists("Connection", "Upgrade")
-                    && HeaderExists("Sec-WebSocket-Accept");
+                    && HeaderExists(HeaderConstants.SEC_WEBSOCKET_ACCEPT);
             }
         }
 
@@ -80,20 +112,19 @@ namespace WebSocketSharp
 
         public string StatusCode { get; internal set; }
 
-        
-
-        
-
         public static ResponseHandshake CreateCloseResponse(HttpStatusCode code)
         {
             var res = new ResponseHandshake(code);
             res.AddHeader("Connection", "close");
+            res.AddHeader(HeaderConstants.SEC_WEBSOCKET_VERSION, RequestHandshake.Version);
 
             return res;
         }
 
-        public static ResponseHandshake Parse(string[] response)
+        public static ResponseHandshake ReadFromStream(WebSocketStream responseStream)
         {
+            var response = responseStream.ReadHandshake(TimeSpan.FromSeconds(30));
+
             var statusLine = response[0].Split(' ');
             if (statusLine.Length < 3)
                 throw new ArgumentException("Invalid status line.");
@@ -115,6 +146,8 @@ namespace WebSocketSharp
             };
         }
 
+
+
         public void SetCookies(CookieCollection cookies)
         {
             if (cookies.IsNull() || cookies.Count == 0)
@@ -135,6 +168,6 @@ namespace WebSocketSharp
             return buffer.ToString();
         }
 
-        
+
     }
 }
