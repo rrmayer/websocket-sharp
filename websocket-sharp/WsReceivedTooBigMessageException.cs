@@ -28,26 +28,27 @@
 
 using System;
 
-namespace WebSocketSharp {
-
-  public class WsReceivedTooBigMessageException : Exception
-  {
-    private static readonly string _defaultMessage;
-
-    static WsReceivedTooBigMessageException()
+namespace WebSocketSharp
+{
+    [Serializable]
+    public class WsReceivedTooBigMessageException : Exception
     {
-      _defaultMessage = String.Format(
-        "Size of received payload data is bigger than the allowable value({0} bytes).", PayloadData.MaxLength);
-    }
+        private static readonly string _defaultMessage;
 
-    public WsReceivedTooBigMessageException()
-     : this(_defaultMessage)
-    {
-    }
+        static WsReceivedTooBigMessageException()
+        {
+            _defaultMessage = String.Format(
+              "Size of received payload data is bigger than the allowable value({0} bytes).", PayloadData.MaxLength);
+        }
 
-    public WsReceivedTooBigMessageException(string message)
-     : base(message)
-    {
+        public WsReceivedTooBigMessageException()
+            : this(_defaultMessage)
+        {
+        }
+
+        public WsReceivedTooBigMessageException(string message)
+            : base(message)
+        {
+        }
     }
-  }
 }

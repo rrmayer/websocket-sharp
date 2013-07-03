@@ -27,7 +27,7 @@ namespace WebSocketSharp.Net.WebSockets
         /// </exception>
         public ClientWebSocket()
         {
-
+            Options = new ClientWebSocketOptions();
         }
 
         public Uri ConnectedUri { get; private set; }

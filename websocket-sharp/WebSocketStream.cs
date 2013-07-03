@@ -269,8 +269,10 @@ namespace WebSocketSharp
             if (secure)
             {
                 var sslStream = new SslStream(netStream, false);
-                var certPath = ConfigurationManager.AppSettings["ServerCertPath"];
-                sslStream.AuthenticateAsServer(new X509Certificate2(certPath));
+                var certPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "localhost.pfx");  //Todo: hard-coded value.
+                var certPass = "supersocket"; //Todo: hard-coded value
+                var cert = new X509Certificate2(certPath, certPass);
+                sslStream.AuthenticateAsServer(cert);
 
                 return new WebSocketStream(sslStream);
             }

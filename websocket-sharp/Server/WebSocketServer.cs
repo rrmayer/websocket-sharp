@@ -46,7 +46,7 @@ namespace WebSocketSharp.Server
     public sealed class WebSocketServer : WebSocketServerBase
     {
         private ServiceHostManager _svcHosts;
-        
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WebSocketServer"/> class.
@@ -141,9 +141,9 @@ namespace WebSocketSharp.Server
             init();
         }
 
-        
 
-        
+
+
 
         /// <summary>
         /// Gets the collection of paths associated with the every WebSocket services that the server provides.
@@ -182,15 +182,15 @@ namespace WebSocketSharp.Server
             }
         }
 
-        
 
-        
+
+
 
         private void init()
         {
             _svcHosts = new ServiceHostManager();
         }
-        
+
         /// <summary>
         /// Accepts a WebSocket connection request.
         /// </summary>
@@ -213,7 +213,7 @@ namespace WebSocketSharp.Server
 
             svcHost.AddWebSocketSession(webSocket);
         }
-        
+
         /// <summary>
         /// Adds the specified type WebSocket service.
         /// </summary>
@@ -244,6 +244,9 @@ namespace WebSocketSharp.Server
         public void AddWebSocketService(IWebSocketServiceHost svcHost, string absPath)
         {
             string msg;
+            if (string.IsNullOrEmpty(absPath))
+                absPath = "/";
+
             if (!absPath.IsValidAbsolutePath(out msg))
                 throw new ArgumentException(msg, "absPath");
 
@@ -277,6 +280,6 @@ namespace WebSocketSharp.Server
             _svcHosts.CloseAllSessionsForServerShutdown();
         }
 
-        
+
     }
 }
